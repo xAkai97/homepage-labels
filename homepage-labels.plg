@@ -1,0 +1,236 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+  <!ENTITY name        "homepage-labels">
+  <!ENTITY author      "xAkai97">
+  <!ENTITY version     "2026.10.31">
+  <!ENTITY gitURL      "https://raw.githubusercontent.com/xAkai97/homepage-labels/main">
+  <!ENTITY pluginURL   "&gitURL;/homepage-labels.plg">
+  <!ENTITY pkgURL      "&gitURL;/archive/&name;-&version;.txz">
+  <!ENTITY md5         "">
+  <!ENTITY launch      "Settings/HomepageLabels">
+  <!ENTITY plugdir     "/usr/local/emhttp/plugins/&name;">
+  <!ENTITY cfgdir      "/boot/config/plugins/&name;">
+]>
+
+<PLUGIN  name="&name;"
+         author="&author;"
+         version="&version;"
+         pluginURL="&pluginURL;"
+         launch="&launch;"
+         min="6.12.0"
+         icon="tags"
+         support="https://github.com/xAkai97/homepage-labels/issues">
+
+<CHANGES>
+###2026.10.31
+- Unified Tabbed Interface (Option 2): Consolidated Dashboard &amp; Global Settings under a single User Utilities icon with top tab navigation
+- In-Page Docker Edit Overlay Editor: Added optional modal Overlay Editor right inside Unraid's native Docker UpdateContainer/AddContainer pages with live form DOM synchronization
+- Direct Preset Application: 1-Click "Apply Preset" from default catalog directly to editor without requiring prior template cloning
+- Deep-Linked Event Notifications: Dynamix new container alerts link directly to container's visual label editor (?edit=container)
+- Interactive Navigation: Clickable dashboard container names and icons, direct external WebUI launcher chips, and Homepage widget docs links
+- Sticky Editor Actions Bar: Floating Save and Recreate actions with backdrop-blur for rapid multi-accordion edits
+- Dashboard Health Warnings: Automatic alert banner when Homepage container is stopped or missing Docker socket integration
+- Security &amp; Protocol Hardening: Enforce strict HTTP/HTTPS protocol constraints on connection tester to prevent SSRF and preserve secret string typing in services.yaml export
+- Native Hook Fix: Eliminated page reload in Unraid Add/Edit container hook to preserve unsaved form modifications on pause/resume
+- Live Service Card Preview &amp; Usability Polish: Real-time visual Homepage card preview in editor, 1-click segmented status filter pills, unified template toolbar with Manage menu, collapsible catalog drawer, dimmed row hygiene, and contextual API key hints
+- Expanded Modular Test Suite: 74 test cases with 100% pass rate in modular suite harness with CLI --filter support validating parser, presets, backups, security, and edge conditions
+
+###2026.09.19
+- Security Hardening: Enforce strict CSRF validation on all state-modifying endpoints (fail-closed when token is missing)
+- Secure Icon Thumbnailing: Enforce strict image extension whitelist (.png, .svg, .webp, .jpg, .jpeg, .ico) and directory-boundary safe traversal checks
+- Pre-Write Snapshot Integrity: Capture prior labels before writing to guarantee 1-click restore/undo always reverts to the previous configuration
+- Safe INI Settings Serialization: Add savePluginSettings() helper preventing configuration corruption and injection of quotes or newlines
+- Unified Settings Loader: Standardize default settings fallback and error handling across dashboard, settings, and AJAX endpoints
+- UI &amp; Code Hygiene: Deduplicate secret/masking calculation in form rendering and centralize backup file path resolution
+- Expanded Test Harness: Added test suites for plugin settings serialization and backup path sanitization (38 automated tests passing)
+
+###2026.09.04
+- Built-in Dashboard Icon Browser &amp; Search with 2,000+ Walkxcode icons, jsDelivr caching, and local custom icon folder integration
+- Dashboard Batch &amp; Bulk Operations: multi-select checkboxes, floating bulk toolbar, batch enable/disable, batch apply templates, and sequential container recreation with live progress dialog
+- Individual Secret Masking &amp; Reveal Toggle with [👁] show/hide button on all passwords/tokens, XML Mask="true" synchronization, and auto-detection
+- Pre-Save Diff &amp; Recreate Warning modal with before/after comparison, additions/removals highlighting, and Save XML Only fallback
+- Import &amp; Export Custom Templates: JSON backup downloads, drag-and-drop file import, paste textarea, live pill preview, and 3 conflict handling modes
+- Advanced XML Template &lt;Config&gt; Mode: customize Unraid template attributes (Name, Default, Description, Display, Required, Mask)
+- UI Font Readability Scaling (100%, 110%, 125%, 140%) with live toolbar switcher and persistent settings
+- Bottom-Grouped Differential XML Engine: change detection to prevent redundant container restarts and clean template grouping
+- Label Snapshot Backup, Undo &amp; Restore: 1-click restore from dashboard and customizable retention hours
+- Dynamic group combobox autocomplete and native Unraid Dynamix theme parity across Light/Dark modes
+
+###2026.08.28
+- 6-Section categorized collapsible accordions with active field badges
+- Interactive active vs. dimmed field lifecycle with red remove buttons
+- Custom template management toolbar (Apply, Save As, Rename, Delete)
+- 1-click cloning of shipped default presets into custom templates
+- Live Homepage services.yaml translation and Docker label exporter with clipboard copy
+- URL Quick-Fill helper chips (Host URL, Container URL, WebUI URL)
+- Master catalog of all known Homepage fields including multi-key widgets (Cloudflare, Weather, Tailscale, Speedtest)
+- Enhanced validation with automatic section expansion and error highlighting
+
+###2026.08.21
+- Initial release
+- Dashboard overview of all containers and their Homepage discovery state
+- Visual label editor with auto-detected presets for 20+ popular apps
+- Icon, URL, and port auto-resolution from container templates
+- Widget configuration with field validation for all supported Homepage widgets
+- Per-field mask toggle for sensitive values
+- Safe XML template manipulation with backup support
+- One-click container recreation via Unraid's native dockerman
+- Homepage container health check (running status, Docker socket validation)
+- Preset system with verified/unverified status and custom override support
+</CHANGES>
+
+<!--
+=============================================================================
+INSTALL SCRIPT
+=============================================================================
+-->
+<FILE Run="/bin/bash">
+<INLINE>
+#!/bin/bash
+
+PLUGIN_NAME="homepage-labels"
+PLUGIN_DIR="/usr/local/emhttp/plugins/${PLUGIN_NAME}"
+CFG_DIR="/boot/config/plugins/${PLUGIN_NAME}"
+
+echo "-----------------------------------------------------------"
+echo " Homepage Label Manager — Installing..."
+echo "-----------------------------------------------------------"
+
+# Create plugin directories
+mkdir -p "${PLUGIN_DIR}/scripts"
+mkdir -p "${PLUGIN_DIR}/include"
+mkdir -p "${PLUGIN_DIR}/event"
+mkdir -p "${CFG_DIR}"
+mkdir -p "${CFG_DIR}/backups"
+mkdir -p "/tmp/homepage-labels/backups"
+mkdir -p "/tmp/homepage-labels/logs"
+
+echo " Plugin directories created."
+
+# If settings.cfg doesn't exist yet, create defaults
+if [ ! -f "${CFG_DIR}/settings.cfg" ]; then
+    echo 'BASE_HOST=""' > "${CFG_DIR}/settings.cfg"
+    echo 'BASE_SCHEME="http"' >> "${CFG_DIR}/settings.cfg"
+    echo 'INTERNAL_URL_MODE="host_port"' >> "${CFG_DIR}/settings.cfg"
+    echo 'DEFAULT_MASK_SECRETS="true"' >> "${CFG_DIR}/settings.cfg"
+    echo 'HOMEPAGE_CONTAINER_NAME="homepage"' >> "${CFG_DIR}/settings.cfg"
+    echo 'BACKUP_BEFORE_WRITE="true"' >> "${CFG_DIR}/settings.cfg"
+    echo 'BACKUP_RETENTION_HOURS="24"' >> "${CFG_DIR}/settings.cfg"
+    echo 'GROUP_LABELS_AT_BOTTOM="true"' >> "${CFG_DIR}/settings.cfg"
+    echo 'CUSTOM_ICONS_HOST_DIR=""' >> "${CFG_DIR}/settings.cfg"
+    echo 'CUSTOM_ICONS_URL_PREFIX="/icons/"' >> "${CFG_DIR}/settings.cfg"
+    echo 'UI_FONT_SCALE="100"' >> "${CFG_DIR}/settings.cfg"
+    echo 'HOMEPAGE_SERVICES_FILE_PATH="/mnt/user/appdata/homepage/config/services.yaml"' >> "${CFG_DIR}/settings.cfg"
+    echo 'DOCKER_EDIT_OVERLAY="true"' >> "${CFG_DIR}/settings.cfg"
+    echo " Default settings.cfg created."
+fi
+
+echo ""
+echo " Homepage Label Manager installed successfully!"
+echo " Navigate to Settings -> User Utilities -> Homepage Labels to get started."
+echo "-----------------------------------------------------------"
+</INLINE>
+</FILE>
+
+<!--
+=============================================================================
+PLUGIN FILES
+=============================================================================
+-->
+
+<!-- Main Dashboard & Editor Page -->
+<FILE Name="/usr/local/emhttp/plugins/homepage-labels/HomepageLabels.page" Mode="0644">
+<URL>&gitURL;/src/usr/local/emhttp/plugins/homepage-labels/HomepageLabels.page</URL>
+</FILE>
+
+<!-- Settings Page -->
+<FILE Name="/usr/local/emhttp/plugins/homepage-labels/HomepageLabelsSettings.page" Mode="0644">
+<URL>&gitURL;/src/usr/local/emhttp/plugins/homepage-labels/HomepageLabelsSettings.page</URL>
+</FILE>
+
+<!-- Default Presets -->
+<FILE Name="/usr/local/emhttp/plugins/homepage-labels/default_presets.json" Mode="0644">
+<URL>&gitURL;/src/usr/local/emhttp/plugins/homepage-labels/default_presets.json</URL>
+</FILE>
+
+<!-- Plugin Icon -->
+<FILE Name="/usr/local/emhttp/plugins/homepage-labels/homepage-labels.png" Mode="0644">
+<URL>&gitURL;/src/usr/local/emhttp/plugins/homepage-labels/homepage-labels.png</URL>
+</FILE>
+
+<!-- Include: XML Parser -->
+<FILE Name="/usr/local/emhttp/plugins/homepage-labels/include/xml_parser.php" Mode="0644">
+<URL>&gitURL;/src/usr/local/emhttp/plugins/homepage-labels/include/xml_parser.php</URL>
+</FILE>
+
+<!-- Include: Preset Engine -->
+<FILE Name="/usr/local/emhttp/plugins/homepage-labels/include/preset_engine.php" Mode="0644">
+<URL>&gitURL;/src/usr/local/emhttp/plugins/homepage-labels/include/preset_engine.php</URL>
+</FILE>
+
+<!-- Include: View Components -->
+<FILE Name="/usr/local/emhttp/plugins/homepage-labels/include/view_components.php" Mode="0644">
+<URL>&gitURL;/src/usr/local/emhttp/plugins/homepage-labels/include/view_components.php</URL>
+</FILE>
+
+<!-- Scripts: Apply Labels -->
+<FILE Name="/usr/local/emhttp/plugins/homepage-labels/scripts/apply_labels.php" Mode="0644">
+<URL>&gitURL;/src/usr/local/emhttp/plugins/homepage-labels/scripts/apply_labels.php</URL>
+</FILE>
+
+<!-- Scripts: Docker Exec -->
+<FILE Name="/usr/local/emhttp/plugins/homepage-labels/scripts/docker_exec.sh" Mode="0755">
+<URL>&gitURL;/src/usr/local/emhttp/plugins/homepage-labels/scripts/docker_exec.sh</URL>
+</FILE>
+
+<!-- Scripts: Validator -->
+<FILE Name="/usr/local/emhttp/plugins/homepage-labels/scripts/validator.php" Mode="0644">
+<URL>&gitURL;/src/usr/local/emhttp/plugins/homepage-labels/scripts/validator.php</URL>
+</FILE>
+
+<!-- Native Docker Template Hook -->
+<FILE Name="/usr/local/emhttp/plugins/homepage-labels/HomepageLabelsHook.page" Mode="0644">
+<URL>&gitURL;/src/usr/local/emhttp/plugins/homepage-labels/HomepageLabelsHook.page</URL>
+</FILE>
+
+<!-- Dynamix Event Hook: Docker Container Created -->
+<FILE Name="/usr/local/emhttp/plugins/homepage-labels/event/docker_container_created" Mode="0755">
+<URL>&gitURL;/src/usr/local/emhttp/plugins/homepage-labels/event/docker_container_created</URL>
+</FILE>
+
+<!-- README -->
+<FILE Name="/usr/local/emhttp/plugins/homepage-labels/README.md" Mode="0644">
+<URL>&gitURL;/src/usr/local/emhttp/plugins/homepage-labels/README.md</URL>
+</FILE>
+
+<!--
+=============================================================================
+REMOVE SCRIPT
+=============================================================================
+-->
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+#!/bin/bash
+
+PLUGIN_NAME="homepage-labels"
+PLUGIN_DIR="/usr/local/emhttp/plugins/${PLUGIN_NAME}"
+
+echo "-----------------------------------------------------------"
+echo " Homepage Label Manager — Removing..."
+echo "-----------------------------------------------------------"
+
+# Remove plugin files (preserve user config on boot drive)
+rm -rf "${PLUGIN_DIR}"
+
+# Remove temp files
+rm -rf "/tmp/homepage-labels"
+
+echo " Plugin files removed."
+echo " User settings preserved at /boot/config/plugins/${PLUGIN_NAME}/"
+echo " To fully remove, also delete: /boot/config/plugins/${PLUGIN_NAME}/"
+echo "-----------------------------------------------------------"
+</INLINE>
+</FILE>
+
+</PLUGIN>

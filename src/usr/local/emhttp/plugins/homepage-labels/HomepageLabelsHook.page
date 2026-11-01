@@ -1,0 +1,472 @@
+Menu="Buttons:99"
+Link="hp-hook"
+Cond="preg_match('/AddContainer|UpdateContainer/', $_SERVER['REQUEST_URI'] ?? '')"
+Markdown="false"
+---
+<?php
+/**
+ * HomepageLabelsHook.page — Native Unraid Docker Template Editor Integration
+ *
+ * Injected automatically by Dynamix into AddContainer and UpdateContainer views.
+ * Places a minimal native "Add Homepage Labels" action link directly under
+ * Unraid's "Add another Path, Port, Variable, Label or Device" link that opens
+ * the Homepage Labels Visual Editor in an in-page overlay modal (or full page).
+ */
+
+$overlayEnabled = true;
+$presetEnginePath = '/usr/local/emhttp/plugins/homepage-labels/include/preset_engine.php';
+if (file_exists($presetEnginePath)) {
+    require_once $presetEnginePath;
+    if (function_exists('loadPluginSettings')) {
+        $hookSettings = loadPluginSettings();
+        $overlayEnabled = (($hookSettings['DOCKER_EDIT_OVERLAY'] ?? 'true') === 'true');
+    }
+}
+?>
+
+<style>
+.hp-bottom-hook-row {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-family: inherit;
+}
+.hp-add-labels-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+}
+.hp-add-labels-link:hover {
+    text-decoration: underline;
+}
+.hp-native-toggle-link {
+    font-size: 0.85em;
+    opacity: 0.8;
+    cursor: pointer;
+    text-decoration: none;
+}
+.hp-native-toggle-link:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+.hp-native-hook-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    font-size: 0.88em;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none !important;
+    border: 1px solid rgba(120, 120, 120, 0.35);
+    background: rgba(120, 120, 120, 0.12);
+    color: inherit;
+    transition: all 0.15s ease;
+}
+.hp-native-hook-btn:hover {
+    background: rgba(230, 81, 0, 0.18);
+    border-color: #e65100;
+    color: #e65100;
+}
+.hp-native-badge {
+    font-size: 0.82em;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+.hp-native-badge--active {
+    background: rgba(39, 174, 96, 0.18);
+    color: #27ae60;
+    border: 1px solid rgba(39, 174, 96, 0.35);
+}
+.hp-native-badge--disabled {
+    background: rgba(230, 81, 0, 0.15);
+    color: #e65100;
+    border: 1px solid rgba(230, 81, 0, 0.35);
+}
+.hp-overlay-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+.hp-overlay-dialog {
+    width: 95vw;
+    max-width: 1380px;
+    height: 90vh;
+    background: var(--background-color, #1c1c1c);
+    color: var(--text-color, inherit);
+    border: 1px solid rgba(230, 81, 0, 0.45);
+    border-radius: 10px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.65);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.hp-overlay-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    background: rgba(230, 81, 0, 0.12);
+    border-bottom: 1px solid rgba(230, 81, 0, 0.3);
+    flex-shrink: 0;
+}
+.hp-overlay-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 1.05em;
+    color: #e65100;
+}
+.hp-overlay-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.hp-overlay-close {
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-size: 1.5em;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 8px;
+    opacity: 0.75;
+    border-radius: 4px;
+}
+.hp-overlay-close:hover {
+    opacity: 1;
+    background: rgba(230, 81, 0, 0.2);
+    color: #e65100;
+}
+.hp-overlay-iframe {
+    width: 100%;
+    flex: 1;
+    border: none;
+    background: var(--background-color, #1c1c1c);
+}
+</style>
+
+<script>
+(function() {
+    var overlayEnabled = <?= $overlayEnabled ? 'true' : 'false' ?>;
+
+    /**
+     * Resolve container name from form inputs or xmlTemplate query parameter
+     * (e.g., ?xmlTemplate=edit:/boot/config/plugins/dockerMan/templates-user/my-Docker-Socket-Proxy.xml)
+     */
+    function hpResolveContainerName() {
+        var fromInput = $('input[name="contName"], input[name="Name"], #Name').first().val() || '';
+        if (fromInput && $.trim(fromInput)) {
+            return $.trim(fromInput);
+        }
+        var search = window.location.search || '';
+        try {
+            var decoded = decodeURIComponent(search);
+            var match = decoded.match(/[\/\\]my-([^\/\\&?]+)\.xml/i);
+            if (match && match[1]) {
+                return match[1];
+            }
+        } catch (e) {}
+        return '';
+    }
+
+    $(function() {
+        var $form = $('form#docker_form, form[name="docker_form"]');
+        if (!$form.length) {
+            $form = $('form[action*="UpdateContainer"], form[action*="AddContainer"]');
+        }
+        if (!$form.length) return;
+
+        // Count existing homepage labels in the form
+        var labelCount = 0;
+        var disabledLabelCount = 0;
+
+        $('input[name*="confTarget"], input[name*="Target"]').each(function() {
+            var val = $(this).val() || '';
+            if (val.indexOf('homepage.') === 0) {
+                var $row = $(this).closest('tr, div.shade');
+                var $typeSelect = $row.find('select[name*="confType"], select[name*="Type"]');
+                if ($typeSelect.val() === 'Disabled:Label') {
+                    disabledLabelCount++;
+                } else {
+                    labelCount++;
+                }
+            }
+        });
+
+        // Build minimal bottom link row ("Add Homepage Labels" or "Edit Homepage Labels")
+        var $rowWrap = $('<div>').attr('id', 'hp-bottom-hook-row').addClass('hp-bottom-hook-row');
+
+        var initialLinkHtml = (labelCount > 0 || disabledLabelCount > 0)
+            ? '<i class="fa fa-tags"></i> Edit Homepage Labels'
+            : '<i class="fa fa-plus-square"></i> Add Homepage Labels';
+
+        var $addLink = $('<a>')
+            .attr('href', '#')
+            .attr('id', 'hp-add-labels-link')
+            .addClass('hp-add-labels-link')
+            .html(initialLinkHtml)
+            .on('click', function(e) {
+                e.preventDefault();
+                var cName = hpResolveContainerName();
+                if (!cName) {
+                    alert('Please enter a Container Name first before configuring Homepage labels.');
+                    return;
+                }
+                if (overlayEnabled) {
+                    hpOpenOverlayEditor(cName);
+                } else {
+                    window.location.href = '/Settings/HomepageLabels?edit=' + encodeURIComponent(cName);
+                }
+            });
+        $rowWrap.append($addLink);
+
+        if (labelCount > 0) {
+            $rowWrap.append($('<span>').addClass('hp-native-badge hp-native-badge--active').text(labelCount + ' Active'));
+            $rowWrap.append(
+                $('<a>').attr('href', '#').attr('id', 'hp-native-toggle-btn').addClass('hp-native-toggle-link')
+                    .attr('title', 'Pause discovery using Disabled:Label without deleting labels')
+                    .html('<i class="fa fa-pause-circle"></i> Pause')
+                    .on('click', function(e) { e.preventDefault(); hpNativeToggleLabels('Disabled:Label'); })
+            );
+        } else if (disabledLabelCount > 0) {
+            $rowWrap.append($('<span>').addClass('hp-native-badge hp-native-badge--disabled').text(disabledLabelCount + ' Paused'));
+            $rowWrap.append(
+                $('<a>').attr('href', '#').attr('id', 'hp-native-toggle-btn').addClass('hp-native-toggle-link')
+                    .attr('title', 'Resume discovery back to active Label type')
+                    .html('<i class="fa fa-play-circle"></i> Resume')
+                    .on('click', function(e) { e.preventDefault(); hpNativeToggleLabels('Label'); })
+            );
+        }
+
+        var $notice = $('<span>').attr('id', 'hp-native-notice').css('display', 'none');
+        $rowWrap.append($notice);
+
+        // Place right under Unraid's "Add another Path, Port, Variable, Label or Device" link
+        var $addConfigLink = $form.find('a[onclick*="addConfigPopup"], a:contains("Add another Path, Port, Variable, Label or Device")').first();
+        if ($addConfigLink.length) {
+            $rowWrap.insertAfter($addConfigLink);
+        } else {
+            // Resilient fallback if Unraid changes the Add Config link in a future release
+            var $submitRow = $form.find('#docker_buttons, input[type="submit"], button[type="submit"]').first().closest('dl, div, tr');
+            if ($submitRow.length) {
+                var $fallbackDl = $('<dl><dt>&nbsp;</dt><dd></dd></dl>');
+                $fallbackDl.find('dd').append($rowWrap);
+                $fallbackDl.insertBefore($submitRow);
+            } else {
+                $form.append($rowWrap);
+            }
+        }
+    });
+
+    /**
+     * Switch Homepage labels between "Label" and "Disabled:Label"
+     */
+    function hpNativeToggleLabels(newType) {
+        var count = 0;
+        $('input[name*="confTarget"], input[name*="Target"]').each(function() {
+            var val = $(this).val() || '';
+            if (val.indexOf('homepage.') === 0) {
+                var $row = $(this).closest('tr, div.shade');
+                var $typeSelect = $row.find('select[name*="confType"], select[name*="Type"]');
+                if ($typeSelect.length) {
+                    $typeSelect.val(newType).trigger('change');
+                    count++;
+                }
+            }
+        });
+        if (count > 0) {
+            var isPaused = (newType === 'Disabled:Label');
+            var $badge = $('.hp-native-badge');
+            if (!$badge.length) {
+                $badge = $('<span>').addClass('hp-native-badge').insertAfter('#hp-add-labels-link');
+            }
+            if (isPaused) {
+                $badge.removeClass('hp-native-badge--active').addClass('hp-native-badge--disabled').text(count + ' Paused');
+                $('#hp-native-toggle-btn')
+                    .html('<i class="fa fa-play-circle"></i> Resume')
+                    .attr('title', 'Resume discovery back to active Label type')
+                    .off('click').on('click', function(e) { e.preventDefault(); hpNativeToggleLabels('Label'); });
+            } else {
+                $badge.removeClass('hp-native-badge--disabled').addClass('hp-native-badge--active').text(count + ' Active');
+                $('#hp-native-toggle-btn')
+                    .html('<i class="fa fa-pause-circle"></i> Pause')
+                    .attr('title', 'Pause discovery using Disabled:Label without deleting labels')
+                    .off('click').on('click', function(e) { e.preventDefault(); hpNativeToggleLabels('Disabled:Label'); });
+            }
+            $('#hp-native-notice')
+                .css({
+                    'display': 'inline-block',
+                    'padding': '2px 8px',
+                    'border-radius': '4px',
+                    'font-size': '0.85em',
+                    'background': 'rgba(39, 174, 96, 0.15)',
+                    'color': '#27ae60',
+                    'border': '1px solid rgba(39, 174, 96, 0.35)'
+                })
+                .html('<i class="fa fa-check-circle"></i> Updated to <strong>' + newType + '</strong> (click Apply below to save)');
+        }
+    }
+
+    /**
+     * Open in-page Overlay Editor modal for the current container
+     */
+    function hpOpenOverlayEditor(containerName) {
+        if (!containerName) return;
+        hpCloseOverlayEditor();
+
+        var editorUrl = '/Settings/HomepageLabels?edit=' + encodeURIComponent(containerName) + '&embed=1';
+        var fullUrl = '/Settings/HomepageLabels?edit=' + encodeURIComponent(containerName);
+
+        var $backdrop = $('<div>').attr('id', 'hp-overlay-modal').addClass('hp-overlay-backdrop')
+            .on('click', function(e) {
+                if (e.target === this) hpCloseOverlayEditor();
+            });
+
+        var $dialog = $('<div>').addClass('hp-overlay-dialog').attr('role', 'dialog').attr('aria-modal', 'true');
+        var $header = $('<div>').addClass('hp-overlay-header');
+
+        var $title = $('<div>').addClass('hp-overlay-title')
+            .append($('<i>').addClass('fa fa-tags'))
+            .append($('<span>').text('Homepage Label Editor — ' + containerName));
+
+        var $headerActions = $('<div>').addClass('hp-overlay-header-actions');
+        var $openFull = $('<a>').addClass('hp-native-hook-btn')
+            .attr('href', fullUrl)
+            .attr('target', '_blank')
+            .attr('rel', 'noopener noreferrer')
+            .html('<i class="fa fa-external-link"></i> Open Full Page');
+        var $closeBtn = $('<button>').attr('type', 'button').addClass('hp-overlay-close')
+            .attr('title', 'Close Overlay (Esc)')
+            .html('&times;')
+            .on('click', function() { hpCloseOverlayEditor(); });
+
+        $headerActions.append($openFull).append($closeBtn);
+        $header.append($title).append($headerActions);
+
+        var $iframe = $('<iframe>').attr('id', 'hp-overlay-iframe').addClass('hp-overlay-iframe').attr('src', editorUrl);
+
+        $dialog.append($header).append($iframe);
+        $backdrop.append($dialog);
+        $('body').css('overflow', 'hidden').append($backdrop);
+
+        $(document).on('keydown.hpOverlay', function(e) {
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                hpCloseOverlayEditor();
+            }
+        });
+    }
+
+    /**
+     * Close in-page Overlay Editor modal
+     */
+    function hpCloseOverlayEditor() {
+        $(document).off('keydown.hpOverlay');
+        $('#hp-overlay-modal').remove();
+        $('body').css('overflow', '');
+    }
+
+    /**
+     * Synchronize saved Homepage labels back into Unraid's open docker_form DOM
+     */
+    function hpNativeSyncFormLabels(labelsMap) {
+        labelsMap = labelsMap || {};
+        var seenTargets = {};
+
+        $('input[name*="confTarget"], input[name*="Target"]').each(function() {
+            var targetVal = $(this).val() || '';
+            if (targetVal.indexOf('homepage.') === 0) {
+                var $row = $(this).closest('tr, div.shade');
+                if (labelsMap.hasOwnProperty(targetVal)) {
+                    var item = labelsMap[targetVal];
+                    seenTargets[targetVal] = true;
+                    $row.find('input[name*="confValue"], input[name*="Value"]').val(item.value || '');
+                    $row.find('input[name*="confDefault"], input[name*="Default"]').val(item.value || '');
+                    var $typeSelect = $row.find('select[name*="confType"], select[name*="Type"]');
+                    if ($typeSelect.length && $typeSelect.val() !== 'Label') {
+                        $typeSelect.val('Label').trigger('change');
+                    }
+                } else {
+                    $row.remove();
+                }
+            }
+        });
+
+        for (var target in labelsMap) {
+            if (labelsMap.hasOwnProperty(target) && !seenTargets[target]) {
+                var lItem = labelsMap[target];
+                if (typeof addConfig === 'function') {
+                    addConfig(
+                        'Label',
+                        lItem.name || target,
+                        target,
+                        lItem.value || '',
+                        lItem.required === 'true',
+                        lItem.description || 'Homepage Discovery Label',
+                        lItem.mask === 'true',
+                        lItem.display || 'always'
+                    );
+                }
+            }
+        }
+
+        var activeTotal = Object.keys(labelsMap).length;
+        var $badge = $('.hp-native-badge');
+        if (activeTotal > 0) {
+            $('#hp-add-labels-link').html('<i class="fa fa-tags"></i> Edit Homepage Labels');
+            if (!$badge.length) {
+                $badge = $('<span>').addClass('hp-native-badge').insertAfter('#hp-add-labels-link');
+            }
+            $badge.removeClass('hp-native-badge--disabled').addClass('hp-native-badge--active').text(activeTotal + ' Active');
+        } else {
+            $('#hp-add-labels-link').html('<i class="fa fa-plus-square"></i> Add Homepage Labels');
+            if ($badge.length) {
+                $badge.remove();
+            }
+        }
+    }
+
+    // Listen for messages from embedded Overlay Editor iframe
+    window.addEventListener('message', function(event) {
+        if (event.origin !== window.location.origin) return;
+        var data = event.data || {};
+        if (data.type === 'homepage_labels_close') {
+            hpCloseOverlayEditor();
+        } else if (data.type === 'homepage_labels_saved') {
+            hpNativeSyncFormLabels(data.labels || {});
+            var count = Object.keys(data.labels || {}).length;
+            var msgHtml = '<i class="fa fa-check-circle"></i> Saved <strong>' + count + '</strong> Homepage label(s) to XML template and synced with this form.';
+            if (data.recreated) {
+                msgHtml = '<i class="fa fa-check-circle"></i> Saved <strong>' + count + '</strong> Homepage label(s) to XML template and recreated container.';
+            }
+            $('#hp-native-notice')
+                .css({
+                    'display': 'inline-block',
+                    'padding': '2px 8px',
+                    'border-radius': '4px',
+                    'font-size': '0.85em',
+                    'background': 'rgba(39, 174, 96, 0.15)',
+                    'color': '#27ae60',
+                    'border': '1px solid rgba(39, 174, 96, 0.35)'
+                })
+                .html(msgHtml);
+        }
+    });
+})();
+</script>

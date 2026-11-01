@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>sonarr</Name>
+  <Repository>linuxserver/sonarr:latest</Repository>
+  <Registry>https://hub.docker.com/r/linuxserver/sonarr/</Registry>
+  <Network>bridge</Network>
+  <MyPath>templates-user/my-sonarr.xml</MyPath>
+  <Privileged>false</Privileged>
+  <Support>https://forums.unraid.net/</Support>
+  <Project>https://sonarr.tv</Project>
+  <Overview>Sonarr PVR</Overview>
+  <Category>MediaApp:Video MediaServer:Video</Category>
+  <WebUI>http://[IP]:[PORT:8989]/</WebUI>
+  <TemplateURL>false</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/sonarr-icon.png</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled>1690000000</DateInstalled>
+  <DonateText/>
+  <DonateLink/>
+  <Description>Sonarr PVR for TV Series</Description>
+  <Networking>
+    <Mode>bridge</Mode>
+    <Publish>
+      <Port>
+        <HostPort>8989</HostPort>
+        <ContainerPort>8989</ContainerPort>
+        <Protocol>tcp</Protocol>
+      </Port>
+    </Publish>
+  </Networking>
+  <Data>
+    <Volume>
+      <HostDir>/mnt/user/appdata/sonarr</HostDir>
+      <ContainerDir>/config</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+  </Data>
+  <Environment/>
+  <Labels/>
+  <Config Name="WebUI Port" Target="8989" Default="8989" Mode="tcp" Description="Sonarr WebUI Port" Type="Port" Display="always" Required="true" Mask="false">8989</Config>
+  <Config Name="Homepage Group" Target="homepage.group" Default="" Mode="" Description="Homepage Discovery Label" Type="Label" Display="always" Required="false" Mask="false">Media Management</Config>
+  <Config Name="Homepage Name" Target="homepage.name" Default="" Mode="" Description="Homepage Discovery Label" Type="Label" Display="always" Required="false" Mask="false">Sonarr</Config>
+  <Config Name="Homepage Icon" Target="homepage.icon" Default="" Mode="" Description="Homepage Discovery Label" Type="Label" Display="always" Required="false" Mask="false">sonarr.svg</Config>
+  <Config Name="Homepage URL" Target="homepage.href" Default="" Mode="" Description="Homepage Discovery Label" Type="Label" Display="always" Required="false" Mask="false">http://192.168.1.100:8989/</Config>
+  <Config Name="Homepage Widget Type" Target="homepage.widget.type" Default="" Mode="" Description="Homepage Discovery Label" Type="Label" Display="always" Required="false" Mask="false">sonarr</Config>
+  <Config Name="Homepage Widget URL" Target="homepage.widget.url" Default="" Mode="" Description="Homepage Discovery Label" Type="Label" Display="always" Required="false" Mask="false">http://192.168.1.100:8989/</Config>
+  <Config Name="Homepage Widget Key" Target="homepage.widget.key" Default="" Mode="" Description="Homepage Discovery Label" Type="Label" Display="always" Required="false" Mask="true">secret-api-key-xyz</Config>
+</Container>

@@ -1,0 +1,43 @@
+#!/bin/bash
+# Event hook: Triggered when a Docker container is installed or created on Unraid
+
+set -euo pipefail
+
+CONTAINER_NAME="${1:-${CONTAINER_NAME:-}}"
+[ -z "$CONTAINER_NAME" ] && exit 0
+
+# Sanitize container name
+SAFE_NAME=$(echo "$CONTAINER_NAME" | sed 's/[^a-zA-Z0-9_.-]//g')
+[ -z "$SAFE_NAME" ] && exit 0
+
+# Don't notify for Homepage itself
+[ "$SAFE_NAME" = "homepage" ] && exit 0
+
+NOTIFY_BIN="/usr/local/emhttp/webGui/scripts/notify"
+[ ! -x "$NOTIFY_BIN" ] && exit 0
+
+# Check if the container already has Homepage discovery labels configured
+HAS_LABELS=$(php -r "
+    \$xmlParserPath = '/usr/local/emhttp/plugins/homepage-labels/include/xml_parser.php';
+    if (!file_exists(\$xmlParserPath)) exit(0);
+    require_once \$xmlParserPath;
+    \$target = \$argv[1] ?? '';
+    \$res = readTemplate(\$target);
+    if (\$res['success']) {
+        \$labels = getHomepageLabels(\$res['doc']);
+        echo empty(\$labels) ? 'no' : 'yes';
+    } else {
+        echo 'unknown';
+    }
+" "$SAFE_NAME" 2>/dev/null || echo "unknown")
+
+if [ "$HAS_LABELS" = "no" ]; then
+    "$NOTIFY_BIN" \
+        -e "Homepage Labels" \
+        -s "New Container Detected" \
+        -d "Container '${SAFE_NAME}' installed — click to configure Homepage discovery." \
+        -i "normal" \
+        -l "/Settings/HomepageLabels?edit=${SAFE_NAME}"
+fi
+
+exit 0

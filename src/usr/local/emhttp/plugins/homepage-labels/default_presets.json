@@ -1,0 +1,1308 @@
+{
+  "version": "1.0",
+  "schema": {
+    "status_values": ["verified", "unverified"],
+    "source_values": ["bundled", "community", "custom"]
+  },
+  "presets": {
+    "linuxserver/sonarr": {
+      "name": "Sonarr",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["hotio/sonarr", "sonarr/sonarr"],
+      "default_group": "Media Management",
+      "icon": "sonarr.svg",
+      "default_port": 8989,
+      "widget": {
+        "type": "sonarr",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key",
+          "homepage.widget.enableQueue"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "API URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Key",
+            "type": "password",
+            "mask": true,
+            "help": "Settings → General → Security → API Key"
+          },
+          "homepage.widget.enableQueue": {
+            "label": "Enable Queue",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "true",
+            "mask": false
+          }
+        }
+      }
+    },
+    "linuxserver/radarr": {
+      "name": "Radarr",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["hotio/radarr", "radarr/radarr"],
+      "default_group": "Media Management",
+      "icon": "radarr.svg",
+      "default_port": 7878,
+      "widget": {
+        "type": "radarr",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key",
+          "homepage.widget.enableQueue"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "API URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Key",
+            "type": "password",
+            "mask": true,
+            "help": "Settings → General → Security → API Key"
+          },
+          "homepage.widget.enableQueue": {
+            "label": "Enable Queue",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "true",
+            "mask": false
+          }
+        }
+      }
+    },
+    "linuxserver/lidarr": {
+      "name": "Lidarr",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["hotio/lidarr", "lidarr/lidarr"],
+      "default_group": "Media Management",
+      "icon": "lidarr.svg",
+      "default_port": 8686,
+      "widget": {
+        "type": "lidarr",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "API URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Key",
+            "type": "password",
+            "mask": true,
+            "help": "Settings → General → Security → API Key"
+          }
+        }
+      }
+    },
+    "linuxserver/readarr": {
+      "name": "Readarr",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["hotio/readarr", "readarr/readarr"],
+      "default_group": "Media Management",
+      "icon": "readarr.svg",
+      "default_port": 8787,
+      "widget": {
+        "type": "readarr",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "API URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Key",
+            "type": "password",
+            "mask": true,
+            "help": "Settings → General → Security → API Key"
+          }
+        }
+      }
+    },
+    "linuxserver/prowlarr": {
+      "name": "Prowlarr",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["hotio/prowlarr", "prowlarr/prowlarr"],
+      "default_group": "Media Management",
+      "icon": "prowlarr.svg",
+      "default_port": 9696,
+      "widget": {
+        "type": "prowlarr",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "API URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Key",
+            "type": "password",
+            "mask": true,
+            "help": "Settings → General → Security → API Key"
+          }
+        }
+      }
+    },
+    "linuxserver/bazarr": {
+      "name": "Bazarr",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["hotio/bazarr"],
+      "default_group": "Media Management",
+      "icon": "bazarr.svg",
+      "default_port": 6767,
+      "widget": {
+        "type": "bazarr",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "API URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Key",
+            "type": "password",
+            "mask": true,
+            "help": "Settings → General → API Key"
+          }
+        }
+      }
+    },
+    "autobrr/autobrr": {
+      "name": "Autobrr",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["ghcr.io/autobrr/autobrr", "autobrr"],
+      "default_group": "Torrents & Automation",
+      "icon": "autobrr.svg",
+      "default_port": 7474,
+      "widget": {
+        "type": "autobrr",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "API URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Key",
+            "type": "password",
+            "mask": true,
+            "help": "Settings → API Keys → Generate API Key"
+          }
+        }
+      }
+    },
+    "linuxserver/plex": {
+      "name": "Plex",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["plexinc/pms-docker"],
+      "default_group": "Media",
+      "icon": "plex.svg",
+      "default_port": 32400,
+      "widget": {
+        "type": "plex",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Plex URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Token",
+            "type": "password",
+            "mask": true,
+            "help": "Find your token at plex.tv/claim or in Plex XML endpoint"
+          }
+        }
+      }
+    },
+    "linuxserver/jellyfin": {
+      "name": "Jellyfin",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["jellyfin/jellyfin"],
+      "default_group": "Media",
+      "icon": "jellyfin.svg",
+      "default_port": 8096,
+      "widget": {
+        "type": "jellyfin",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key",
+          "homepage.widget.version",
+          "homepage.widget.enableBlocks",
+          "homepage.widget.enableNowPlaying",
+          "homepage.widget.enableUser",
+          "homepage.widget.enableMediaControl",
+          "homepage.widget.showEpisodeNumber",
+          "homepage.widget.expandOneStreamToTwoRows"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Jellyfin URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Key",
+            "type": "password",
+            "mask": true,
+            "help": "Dashboard → API Keys → Create"
+          },
+          "homepage.widget.version": {
+            "label": "API Version",
+            "type": "text",
+            "mask": false,
+            "help": "Optional: e.g. 1"
+          },
+          "homepage.widget.enableBlocks": {
+            "label": "Enable Blocks",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "true",
+            "mask": false
+          },
+          "homepage.widget.enableNowPlaying": {
+            "label": "Enable Now Playing",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "true",
+            "mask": false
+          },
+          "homepage.widget.enableUser": {
+            "label": "Enable User Display",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "true",
+            "mask": false
+          },
+          "homepage.widget.enableMediaControl": {
+            "label": "Enable Media Control",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "false",
+            "mask": false
+          },
+          "homepage.widget.showEpisodeNumber": {
+            "label": "Show Episode Number",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "true",
+            "mask": false
+          },
+          "homepage.widget.expandOneStreamToTwoRows": {
+            "label": "Expand Stream to 2 Rows",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "false",
+            "mask": false
+          }
+        }
+      }
+    },
+    "linuxserver/emby": {
+      "name": "Emby",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["emby/embyserver"],
+      "default_group": "Media",
+      "icon": "emby.svg",
+      "default_port": 8096,
+      "widget": {
+        "type": "emby",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key",
+          "homepage.widget.enableBlocks",
+          "homepage.widget.enableNowPlaying",
+          "homepage.widget.enableUser",
+          "homepage.widget.enableMediaControl",
+          "homepage.widget.showEpisodeNumber",
+          "homepage.widget.expandOneStreamToTwoRows"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Emby URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Key",
+            "type": "password",
+            "mask": true,
+            "help": "Dashboard → API Keys → New API Key"
+          },
+          "homepage.widget.enableBlocks": {
+            "label": "Enable Blocks",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "true",
+            "mask": false
+          },
+          "homepage.widget.enableNowPlaying": {
+            "label": "Enable Now Playing",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "true",
+            "mask": false
+          },
+          "homepage.widget.enableUser": {
+            "label": "Enable User Display",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "true",
+            "mask": false
+          },
+          "homepage.widget.enableMediaControl": {
+            "label": "Enable Media Control",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "false",
+            "mask": false
+          },
+          "homepage.widget.showEpisodeNumber": {
+            "label": "Show Episode Number",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "true",
+            "mask": false
+          },
+          "homepage.widget.expandOneStreamToTwoRows": {
+            "label": "Expand Stream to 2 Rows",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "false",
+            "mask": false
+          }
+        }
+      }
+    },
+    "linuxserver/qbittorrent": {
+      "name": "qBittorrent",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["binhex/arch-qbittorrent", "hotio/qbittorrent"],
+      "default_group": "Downloads",
+      "icon": "qbittorrent.svg",
+      "default_port": 8080,
+      "widget": {
+        "type": "qbittorrent",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.username",
+          "homepage.widget.password",
+          "homepage.widget.key",
+          "homepage.widget.enableLeechProgress",
+          "homepage.widget.enableLeechSize"
+        ],
+        "required_fields": [
+          "homepage.widget.url"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "API URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.username": {
+            "label": "Username",
+            "type": "text",
+            "mask": false,
+            "help": "Required if not using API key"
+          },
+          "homepage.widget.password": {
+            "label": "Password",
+            "type": "password",
+            "mask": true,
+            "help": "Required if not using API key"
+          },
+          "homepage.widget.key": {
+            "label": "API Key / Token",
+            "type": "password",
+            "mask": true,
+            "help": "Alternative to username/password"
+          },
+          "homepage.widget.enableLeechProgress": {
+            "label": "Enable Leech Progress",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "false",
+            "mask": false
+          },
+          "homepage.widget.enableLeechSize": {
+            "label": "Enable Leech Size",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "false",
+            "mask": false
+          }
+        }
+      }
+    },
+    "linuxserver/deluge": {
+      "name": "Deluge",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["binhex/arch-deluge", "binhex/arch-delugevpn"],
+      "default_group": "Downloads",
+      "icon": "deluge.svg",
+      "default_port": 8112,
+      "widget": {
+        "type": "deluge",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.password",
+          "homepage.widget.enableLeechProgress"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.password"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "API URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.password": {
+            "label": "Web UI Password",
+            "type": "password",
+            "mask": true,
+            "help": "Default: deluge"
+          },
+          "homepage.widget.enableLeechProgress": {
+            "label": "Enable Leech Progress",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "false",
+            "mask": false
+          }
+        }
+      }
+    },
+    "linuxserver/sabnzbd": {
+      "name": "SABnzbd",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["hotio/sabnzbd"],
+      "default_group": "Downloads",
+      "icon": "sabnzbd.svg",
+      "default_port": 8080,
+      "widget": {
+        "type": "sabnzbd",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "API URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Key",
+            "type": "password",
+            "mask": true,
+            "help": "Config → General → Security → API Key"
+          }
+        }
+      }
+    },
+    "linuxserver/nzbget": {
+      "name": "NZBGet",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["hotio/nzbget"],
+      "default_group": "Downloads",
+      "icon": "nzbget.svg",
+      "default_port": 6789,
+      "widget": {
+        "type": "nzbget",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.username",
+          "homepage.widget.password"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.username",
+          "homepage.widget.password"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "API URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.username": {
+            "label": "Username",
+            "type": "text",
+            "mask": false,
+            "help": "Default: nzbget"
+          },
+          "homepage.widget.password": {
+            "label": "Password",
+            "type": "password",
+            "mask": true,
+            "help": "Default: tegbzn6789"
+          }
+        }
+      }
+    },
+    "pihole/pihole": {
+      "name": "Pi-hole",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": [],
+      "default_group": "Network",
+      "icon": "pi-hole.svg",
+      "default_port": 80,
+      "widget": {
+        "type": "pihole",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key",
+          "homepage.widget.version"
+        ],
+        "required_fields": [
+          "homepage.widget.url"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Pi-hole URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Token",
+            "type": "password",
+            "mask": true,
+            "help": "Settings → API → Show API token"
+          },
+          "homepage.widget.version": {
+            "label": "Pi-hole Version",
+            "type": "select",
+            "options": ["5", "6"],
+            "default": "5",
+            "mask": false,
+            "help": "Set to 5 for Pi-hole v5.x, 6 for v6.x (v5 is default)"
+          }
+        }
+      }
+    },
+    "adguard/adguardhome": {
+      "name": "AdGuard Home",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": [],
+      "default_group": "Network",
+      "icon": "adguard-home.svg",
+      "default_port": 3000,
+      "widget": {
+        "type": "adguard",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.username",
+          "homepage.widget.password"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.username",
+          "homepage.widget.password"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "AdGuard URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.username": {
+            "label": "Username",
+            "type": "text",
+            "mask": false
+          },
+          "homepage.widget.password": {
+            "label": "Password",
+            "type": "password",
+            "mask": true
+          }
+        }
+      }
+    },
+    "jc21/nginx-proxy-manager": {
+      "name": "Nginx Proxy Manager",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": [],
+      "default_group": "Network",
+      "icon": "nginx-proxy-manager.svg",
+      "default_port": 81,
+      "widget": {
+        "type": "npm",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.username",
+          "homepage.widget.password"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.username",
+          "homepage.widget.password"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "NPM API URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false,
+            "help": "Must include /api (e.g., http://IP:81/api)"
+          },
+          "homepage.widget.username": {
+            "label": "Admin Email",
+            "type": "text",
+            "mask": false
+          },
+          "homepage.widget.password": {
+            "label": "Admin Password",
+            "type": "password",
+            "mask": true
+          }
+        }
+      }
+    },
+    "louislam/uptime-kuma": {
+      "name": "Uptime Kuma",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": [],
+      "default_group": "Monitoring",
+      "icon": "uptime-kuma.svg",
+      "default_port": 3001,
+      "widget": {
+        "type": "uptimekuma",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.slug"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.slug"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Uptime Kuma URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.slug": {
+            "label": "Status Page Slug",
+            "type": "text",
+            "mask": false,
+            "help": "The slug from your status page URL (e.g., 'default')"
+          }
+        }
+      }
+    },
+    "nicolargo/glances": {
+      "name": "Glances",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": [],
+      "default_group": "Monitoring",
+      "icon": "glances.svg",
+      "default_port": 61208,
+      "widget": {
+        "type": "glances",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.username",
+          "homepage.widget.password",
+          "homepage.widget.metric",
+          "homepage.widget.version",
+          "homepage.widget.diskUnits",
+          "homepage.widget.refreshInterval",
+          "homepage.widget.pointsLimit",
+          "homepage.widget.chart"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.metric"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Glances URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.username": {
+            "label": "Username",
+            "type": "text",
+            "mask": false,
+            "help": "Only if Glances auth is enabled"
+          },
+          "homepage.widget.password": {
+            "label": "Password",
+            "type": "password",
+            "mask": true,
+            "help": "Only if Glances auth is enabled"
+          },
+          "homepage.widget.metric": {
+            "label": "Metric",
+            "type": "select",
+            "options": ["cpu", "mem", "fs:/", "network:eth0", "sensor:Package id 0", "process", "gpu:0", "disk:sda"],
+            "default": "cpu",
+            "mask": false,
+            "help": "Metric to display (cpu, mem, fs:/mount, network:iface, etc.)"
+          },
+          "homepage.widget.version": {
+            "label": "API Version",
+            "type": "select",
+            "options": ["3", "4"],
+            "default": "4",
+            "mask": false
+          },
+          "homepage.widget.diskUnits": {
+            "label": "Disk Units",
+            "type": "select",
+            "options": ["b", "k", "m", "g", "t"],
+            "default": "g",
+            "mask": false,
+            "help": "Only applicable when metric is fs"
+          },
+          "homepage.widget.refreshInterval": {
+            "label": "Refresh Interval (sec)",
+            "type": "text",
+            "mask": false,
+            "help": "Refresh interval in seconds"
+          },
+          "homepage.widget.pointsLimit": {
+            "label": "Chart Points Limit",
+            "type": "text",
+            "mask": false,
+            "help": "Number of points to keep in chart"
+          },
+          "homepage.widget.chart": {
+            "label": "Show Chart",
+            "type": "select",
+            "options": ["true", "false"],
+            "default": "true",
+            "mask": false
+          }
+        }
+      }
+    },
+    "ghcr.io/home-assistant/home-assistant": {
+      "name": "Home Assistant",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["homeassistant/home-assistant", "linuxserver/homeassistant"],
+      "default_group": "Home Automation",
+      "icon": "home-assistant.svg",
+      "default_port": 8123,
+      "widget": {
+        "type": "homeassistant",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Home Assistant URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "Long-Lived Access Token",
+            "type": "password",
+            "mask": true,
+            "help": "Profile → Long-Lived Access Tokens → Create Token"
+          }
+        }
+      }
+    },
+    "ghcr.io/immich-app/immich-server": {
+      "name": "Immich",
+      "status": "verified",
+      "source": "bundled",
+      "aliases": ["altran1502/immich-server"],
+      "default_group": "Media",
+      "icon": "immich.svg",
+      "default_port": 2283,
+      "widget": {
+        "type": "immich",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key",
+          "homepage.widget.version"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Immich URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Key",
+            "type": "password",
+            "mask": true,
+            "help": "Account Settings → API Keys → New API Key"
+          },
+          "homepage.widget.version": {
+            "label": "API Version",
+            "type": "text",
+            "mask": false,
+            "help": "Optional: e.g. 1"
+          }
+        }
+      }
+    },
+    "linuxserver/overseerr": {
+      "name": "Overseerr",
+      "status": "verified",
+      "source": "community",
+      "aliases": ["sctx/overseerr", "overseerr/overseerr"],
+      "default_group": "Media Management",
+      "icon": "overseerr.svg",
+      "default_port": 5055,
+      "widget": {
+        "type": "overseerr",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key",
+          "homepage.widget.format"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Overseerr URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Key",
+            "type": "password",
+            "mask": true,
+            "help": "Settings → General → API Key"
+          },
+          "homepage.widget.format": {
+            "label": "Display Format",
+            "type": "text",
+            "mask": false,
+            "help": "Optional: e.g. expanded"
+          }
+        }
+      }
+    },
+    "fallenbagel/jellyseerr": {
+      "name": "Jellyseerr",
+      "status": "verified",
+      "source": "community",
+      "aliases": ["sexypod/jellyseerr"],
+      "default_group": "Media Management",
+      "icon": "jellyseerr.svg",
+      "default_port": 5055,
+      "widget": {
+        "type": "jellyseerr",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Jellyseerr URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Key",
+            "type": "password",
+            "mask": true,
+            "help": "Settings → General → API Key"
+          }
+        }
+      }
+    },
+    "ghcr.io/tautulli/tautulli": {
+      "name": "Tautulli",
+      "status": "verified",
+      "source": "community",
+      "aliases": ["linuxserver/tautulli", "tautulli/tautulli"],
+      "default_group": "Media Streaming",
+      "icon": "tautulli.svg",
+      "default_port": 8181,
+      "widget": {
+        "type": "tautulli",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Tautulli URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Key",
+            "type": "password",
+            "mask": true,
+            "help": "Settings → Web Interface → API Key"
+          }
+        }
+      }
+    },
+    "ghcr.io/advplyr/audiobookshelf": {
+      "name": "Audiobookshelf",
+      "status": "verified",
+      "source": "community",
+      "aliases": ["advplyr/audiobookshelf"],
+      "default_group": "Media Streaming",
+      "icon": "audiobookshelf.svg",
+      "default_port": 13378,
+      "widget": {
+        "type": "audiobookshelf",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Audiobookshelf URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Token",
+            "type": "password",
+            "mask": true,
+            "help": "Settings → Users → API Token"
+          }
+        }
+      }
+    },
+    "linuxserver/transmission": {
+      "name": "Transmission",
+      "status": "verified",
+      "source": "community",
+      "aliases": ["haugene/transmission-openvpn", "transmission/transmission"],
+      "default_group": "Downloads",
+      "icon": "transmission.svg",
+      "default_port": 9091,
+      "widget": {
+        "type": "transmission",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.username",
+          "homepage.widget.password",
+          "homepage.widget.rpcUrl"
+        ],
+        "required_fields": [
+          "homepage.widget.url"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Transmission URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.username": {
+            "label": "RPC Username",
+            "type": "text",
+            "mask": false
+          },
+          "homepage.widget.password": {
+            "label": "RPC Password",
+            "type": "password",
+            "mask": true
+          },
+          "homepage.widget.rpcUrl": {
+            "label": "RPC URL Path",
+            "type": "text",
+            "mask": false,
+            "placeholder": "/transmission/rpc"
+          }
+        }
+      }
+    },
+    "ghcr.io/paperless-ngx/paperless-ngx": {
+      "name": "Paperless-ngx",
+      "status": "verified",
+      "source": "community",
+      "aliases": ["paperlessngx/paperless-ngx"],
+      "default_group": "Productivity",
+      "icon": "paperless-ngx.svg",
+      "default_port": 8000,
+      "widget": {
+        "type": "paperlessngx",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Paperless URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Token",
+            "type": "password",
+            "mask": true,
+            "help": "My Profile → Auth Tokens"
+          }
+        }
+      }
+    },
+    "alexjustesen/speedtest-tracker": {
+      "name": "Speedtest-Tracker",
+      "status": "verified",
+      "source": "community",
+      "aliases": ["ghcr.io/alexjustesen/speedtest-tracker"],
+      "default_group": "Network & Stats",
+      "icon": "speedtest-tracker.svg",
+      "default_port": 8080,
+      "widget": {
+        "type": "speedtest-tracker",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "required_fields": [
+          "homepage.widget.url"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Speedtest-Tracker URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Token",
+            "type": "password",
+            "mask": true,
+            "help": "Settings → API Tokens"
+          }
+        }
+      }
+    },
+    "vaultwarden/server": {
+      "name": "Vaultwarden",
+      "status": "verified",
+      "source": "community",
+      "aliases": ["dani-garcia/bitwarden_rs"],
+      "default_group": "Security & Identity",
+      "icon": "vaultwarden.svg",
+      "default_port": 80
+    },
+    "jvmilazz0/kavita": {
+      "name": "Kavita",
+      "status": "verified",
+      "source": "community",
+      "aliases": ["kavitareader/kavita"],
+      "default_group": "Media & Books",
+      "icon": "kavita.svg",
+      "default_port": 5000,
+      "widget": {
+        "type": "kavita",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.key"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Kavita URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.key": {
+            "label": "API Key",
+            "type": "password",
+            "mask": true,
+            "help": "Server Settings → API Keys"
+          }
+        }
+      }
+    },
+    "gotson/komga": {
+      "name": "Komga",
+      "status": "verified",
+      "source": "community",
+      "aliases": ["komga/komga"],
+      "default_group": "Media & Books",
+      "icon": "komga.svg",
+      "default_port": 25600,
+      "widget": {
+        "type": "komga",
+        "supported_fields": [
+          "homepage.widget.url",
+          "homepage.widget.username",
+          "homepage.widget.password"
+        ],
+        "required_fields": [
+          "homepage.widget.url",
+          "homepage.widget.username",
+          "homepage.widget.password"
+        ],
+        "field_metadata": {
+          "homepage.widget.url": {
+            "label": "Komga URL",
+            "type": "text",
+            "default_from": "webui",
+            "mask": false
+          },
+          "homepage.widget.username": {
+            "label": "Username",
+            "type": "text",
+            "mask": false
+          },
+          "homepage.widget.password": {
+            "label": "Password",
+            "type": "password",
+            "mask": true
+          }
+        }
+      }
+    }
+  }
+}

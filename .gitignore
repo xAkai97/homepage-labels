@@ -1,0 +1,15 @@
+# Personal
+completed.md
+todo.md
+private/
+
+# Environment & Secrets
+.env*
+
+# OS, Temp & Logs
+Thumbs.db
+.DS_Store
+*.tmp
+*.log
+logs/
+/tmp/

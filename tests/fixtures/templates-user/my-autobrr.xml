@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>autobrr</Name>
+  <Repository>ghcr.io/autobrr/autobrr:latest</Repository>
+  <Registry>https://ghcr.io/autobrr/autobrr</Registry>
+  <Network>bridge</Network>
+  <MyPath>templates-user/my-autobrr.xml</MyPath>
+  <Privileged>false</Privileged>
+  <Support>https://autobrr.com</Support>
+  <Project>https://autobrr.com</Project>
+  <Overview>Modern torrent and Usenet grabber</Overview>
+  <Category>Downloaders:</Category>
+  <WebUI>http://[IP]:[PORT:7474]</WebUI>
+  <TemplateURL>false</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/autobrr/autobrr/develop/web/public/favicon.ico</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled>1690000000</DateInstalled>
+  <DonateText/>
+  <DonateLink/>
+  <Description>Modern torrent and Usenet grabber</Description>
+  <Networking>
+    <Mode>bridge</Mode>
+    <Publish>
+      <Port>
+        <HostPort>7474</HostPort>
+        <ContainerPort>7474</ContainerPort>
+        <Protocol>tcp</Protocol>
+      </Port>
+    </Publish>
+  </Networking>
+  <Data>
+    <Volume>
+      <HostDir>/mnt/user/appdata/autobrr</HostDir>
+      <ContainerDir>/config</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+  </Data>
+  <Environment/>
+  <Labels/>
+  <Config Name="WebUI Port" Target="7474" Default="7474" Mode="tcp" Description="WebUI Port" Type="Port" Display="always" Required="true" Mask="false">7474</Config>
+</Container>

@@ -1,0 +1,367 @@
+Menu="Hidden"
+Title="Homepage Labels Settings"
+Icon="cog"
+Markdown="false"
+---
+<?php
+/**
+ * HomepageLabelsSettings.page — Global Plugin Settings
+ *
+ * Provides configuration for:
+ * - Base host/scheme for URL generation
+ * - Internal URL mode (host_port vs container_network)
+ * - Default masking behavior
+ * - Homepage container name for health checks
+ * - Backup settings
+ */
+
+require_once '/usr/local/emhttp/plugins/homepage-labels/include/preset_engine.php';
+require_once '/usr/local/emhttp/plugins/homepage-labels/include/view_components.php';
+
+$settingsPath = defined('PLUGIN_SETTINGS_PATH') ? PLUGIN_SETTINGS_PATH : '/boot/config/plugins/homepage-labels/settings.cfg';
+$defaults = getDefaultPluginSettings();
+
+// Load current settings
+$settings = loadPluginSettings($settingsPath);
+
+// Handle Support Bundle Download
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'download_support_bundle') {
+    $sessionToken = $var['csrf_token'] ?? $_SESSION['csrf_token'] ?? null;
+    $providedToken = $_POST['csrf_token'] ?? '';
+    if (empty($sessionToken) || empty($providedToken) || !hash_equals((string)$sessionToken, (string)$providedToken)) {
+        http_response_code(403);
+        echo 'Invalid CSRF token.';
+        exit;
+    }
+
+    require_once '/usr/local/emhttp/plugins/homepage-labels/include/xml_parser.php';
+    $bundleData = [
+        'generated_at'   => date('Y-m-d H:i:s'),
+        'plugin_version' => '2026.10.31',
+        'php_version'    => PHP_VERSION,
+        'os'             => PHP_OS,
+        'settings'       => $settings,
+        'user_templates' => loadUserTemplates(),
+        'templates_meta' => [],
+    ];
+
+    $allTemplates = listAllTemplates();
+    foreach ($allTemplates as $t) {
+        $tName = is_array($t) ? ($t['name'] ?? '') : $t;
+        if (empty($tName)) continue;
+        $readRes = readTemplate($tName);
+        if ($readRes['success']) {
+            $meta = getContainerMeta($readRes['doc']);
+            $labels = getHomepageLabels($readRes['doc']);
+            foreach ($labels as $tgt => &$lData) {
+                if (isMaskTrue($lData['mask'] ?? false) || strpos($tgt, 'key') !== false || strpos($tgt, 'password') !== false || strpos($tgt, 'token') !== false) {
+                    $lData['value'] = '***REDACTED***';
+                }
+            }
+            $bundleData['templates_meta'][$tName] = [
+                'meta'   => $meta,
+                'labels' => $labels,
+            ];
+        }
+    }
+
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    header('Content-Type: application/json; charset=utf-8');
+    header('Content-Disposition: attachment; filename="homepage-labels-support-bundle-' . date('Ymd-His') . '.json"');
+    echo json_encode($bundleData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+// Handle form POST
+$saved = false;
+$saveError = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_settings') {
+    $sessionToken = $var['csrf_token'] ?? $_SESSION['csrf_token'] ?? null;
+    $providedToken = $_POST['csrf_token'] ?? '';
+    if (empty($sessionToken) || empty($providedToken) || !hash_equals((string)$sessionToken, (string)$providedToken)) {
+        $saveError = 'Invalid CSRF token. Please refresh the page and try again.';
+    }
+
+    if (empty($saveError)) {
+        $newSettings = [];
+        foreach ($defaults as $key => $default) {
+            $newSettings[$key] = isset($_POST[$key]) ? trim($_POST[$key]) : $default;
+        }
+
+        // Validate BASE_HOST
+        if (empty($newSettings['BASE_HOST'])) {
+            $httpHost = $_SERVER['HTTP_HOST'] ?? '';
+            $newSettings['BASE_HOST'] = explode(':', $httpHost)[0] ?: ($_SERVER['SERVER_ADDR'] ?? '');
+        }
+
+        // Write settings file using safe serializer
+        if (savePluginSettings($newSettings, $settingsPath)) {
+            $settings = $newSettings;
+            $saved = true;
+        } else {
+            $saveError = 'Failed to write settings file.';
+        }
+    }
+}
+
+// Health check (if validator available)
+$healthData = [
+    'containerName' => $settings['HOMEPAGE_CONTAINER_NAME'],
+    'running'       => false,
+    'socketMounted' => false,
+];
+
+$validatorPath = '/usr/local/emhttp/plugins/homepage-labels/scripts/validator.php';
+if (file_exists($validatorPath)) {
+    require_once $validatorPath;
+    $healthData = validateHomepageSetup($settings['HOMEPAGE_CONTAINER_NAME']);
+}
+$fontScale = $settings['UI_FONT_SCALE'] ?? '100';
+?>
+
+<style>
+    .homepage-root {
+        --homepage-scale: 1.0;
+        font-family: inherit;
+        font-size: 100%;
+        line-height: inherit;
+        color: inherit;
+        transition: font-size 0.15s ease;
+    }
+    .homepage-root input,
+    .homepage-root select,
+    .homepage-root button,
+    .homepage-root textarea {
+        font-family: inherit !important;
+        color: inherit;
+    }
+    .homepage-root.homepage-scale-100 {
+        --homepage-scale: 1.0;
+        font-size: 100%;
+    }
+    .homepage-root.homepage-scale-110 {
+        --homepage-scale: 1.1;
+        font-size: 110%;
+    }
+    .homepage-root.homepage-scale-125 {
+        --homepage-scale: 1.25;
+        font-size: 125%;
+    }
+    .homepage-root.homepage-scale-140 {
+        --homepage-scale: 1.4;
+        font-size: 140%;
+    }
+</style>
+
+<div class="homepage-root homepage-scale-<?= htmlspecialchars($fontScale) ?>">
+
+<div class="homepage-top-nav" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;border-bottom:2px solid rgba(120,120,120,0.2);padding-bottom:10px;flex-wrap:wrap;gap:10px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+        <a href="/Settings/HomepageLabels" class="homepage-nav-tab" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:6px;background:rgba(120,120,120,0.1);color:inherit;border:1px solid rgba(120,120,120,0.25);text-decoration:none;font-size:0.95em;font-weight:500;"><i class="fa fa-tags"></i> Dashboard &amp; Labels</a>
+        <a href="/Settings/HomepageLabels?tab=settings" class="homepage-nav-tab homepage-nav-tab--active" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:6px;background:#e65100;color:#ffffff;border:1px solid #ff6d00;text-decoration:none;font-size:0.95em;font-weight:600;box-shadow:0 2px 6px rgba(230,81,0,0.25);"><i class="fa fa-cog"></i> Global Settings</a>
+    </div>
+</div>
+
+<?php if ($saved): ?>
+    <div class="notice green-text" style="margin-bottom:16px;">
+        <i class="fa fa-check-circle"></i> Configuration saved.
+    </div>
+<?php endif; ?>
+
+<?php if ($saveError): ?>
+    <div class="notice red-text" style="margin-bottom:16px;">
+        <i class="fa fa-exclamation-triangle"></i> <?= htmlspecialchars($saveError) ?>
+    </div>
+<?php endif; ?>
+
+<form markdown="0" method="POST">
+<input type="hidden" id="settings-action" name="action" value="save_settings">
+<input type="hidden" id="settings-csrf-token" name="csrf_token" value="<?= htmlspecialchars($var['csrf_token'] ?? $_SESSION['csrf_token'] ?? '') ?>">
+
+<div class="title"><span class="left"><i class="fa fa-globe"></i> Network Configuration</span></div>
+<dl>
+    <dt><label for="BASE_HOST">Base Host IP:</label></dt>
+    <dd>
+        <input type="text" id="BASE_HOST" name="BASE_HOST" value="<?= htmlspecialchars($settings['BASE_HOST']) ?>" placeholder="e.g., 192.168.1.50">
+        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Your Unraid server's IP address. Used to generate container URLs.</span>
+    </dd>
+
+    <dt><label for="BASE_SCHEME">URL Scheme:</label></dt>
+    <dd>
+        <select id="BASE_SCHEME" name="BASE_SCHEME">
+            <option value="http" <?= $settings['BASE_SCHEME'] === 'http' ? 'selected' : '' ?>>http</option>
+            <option value="https" <?= $settings['BASE_SCHEME'] === 'https' ? 'selected' : '' ?>>https</option>
+        </select>
+        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Protocol used when generating service URLs.</span>
+    </dd>
+
+    <dt><label for="INTERNAL_URL_MODE">Internal URL Mode:</label></dt>
+    <dd>
+        <select id="INTERNAL_URL_MODE" name="INTERNAL_URL_MODE">
+            <option value="host_port" <?= $settings['INTERNAL_URL_MODE'] === 'host_port' ? 'selected' : '' ?>>Host IP:Port (recommended)</option>
+            <option value="container_network" <?= $settings['INTERNAL_URL_MODE'] === 'container_network' ? 'selected' : '' ?>>Container Name:Port</option>
+        </select>
+        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;"><strong>Host IP:Port</strong> — Uses your server IP with mapped host ports.<br><strong>Container Name:Port</strong> — Uses Docker DNS (requires shared network).</span>
+    </dd>
+</dl>
+
+<div class="title"><span class="left"><i class="fa fa-shield"></i> Security</span></div>
+<dl>
+    <dt><label for="DEFAULT_MASK_SECRETS">Auto-Mask Secrets:</label></dt>
+    <dd>
+        <select id="DEFAULT_MASK_SECRETS" name="DEFAULT_MASK_SECRETS">
+            <option value="true" <?= $settings['DEFAULT_MASK_SECRETS'] === 'true' ? 'selected' : '' ?>>Enabled</option>
+            <option value="false" <?= $settings['DEFAULT_MASK_SECRETS'] === 'false' ? 'selected' : '' ?>>Disabled</option>
+        </select>
+        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Automatically set Mask="true" on key, password, and token fields in Unraid Docker edit UI.</span>
+    </dd>
+</dl>
+
+<div class="title"><span class="left"><i class="fa fa-cogs"></i> Plugin Behavior</span></div>
+<dl>
+    <dt><label for="HOMEPAGE_CONTAINER_NAME">Homepage Container Name:</label></dt>
+    <dd>
+        <input type="text" id="HOMEPAGE_CONTAINER_NAME" name="HOMEPAGE_CONTAINER_NAME" value="<?= htmlspecialchars($settings['HOMEPAGE_CONTAINER_NAME']) ?>" placeholder="homepage">
+        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Name of the Homepage dashboard container (for health checks).</span>
+    </dd>
+
+    <dt><label for="BACKUP_BEFORE_WRITE">Backup Before Write:</label></dt>
+    <dd>
+        <select id="BACKUP_BEFORE_WRITE" name="BACKUP_BEFORE_WRITE">
+            <option value="true" <?= $settings['BACKUP_BEFORE_WRITE'] === 'true' ? 'selected' : '' ?>>Enabled</option>
+            <option value="false" <?= $settings['BACKUP_BEFORE_WRITE'] === 'false' ? 'selected' : '' ?>>Disabled</option>
+        </select>
+        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Create a backup of the XML template before modifying it. Backups stored in /boot/config/plugins/homepage-labels/backups/.</span>
+    </dd>
+
+    <dt><label for="BACKUP_RETENTION_HOURS">Label Backup & Undo Retention:</label></dt>
+    <dd>
+        <select id="BACKUP_RETENTION_HOURS" name="BACKUP_RETENTION_HOURS">
+            <option value="1" <?= ($settings['BACKUP_RETENTION_HOURS'] ?? '24') === '1' ? 'selected' : '' ?>>1 Hour (Quick Undo only)</option>
+            <option value="24" <?= ($settings['BACKUP_RETENTION_HOURS'] ?? '24') === '24' ? 'selected' : '' ?>>24 Hours (1 Day — Recommended)</option>
+            <option value="168" <?= ($settings['BACKUP_RETENTION_HOURS'] ?? '24') === '168' ? 'selected' : '' ?>>7 Days (1 Week)</option>
+            <option value="720" <?= ($settings['BACKUP_RETENTION_HOURS'] ?? '24') === '720' ? 'selected' : '' ?>>30 Days (1 Month)</option>
+            <option value="0" <?= ($settings['BACKUP_RETENTION_HOURS'] ?? '24') === '0' ? 'selected' : '' ?>>Keep Forever (No Expiry)</option>
+        </select>
+        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">How long label snapshots are retained for one-click restoration after disabling or modifying containers.</span>
+    </dd>
+
+    <dt><label for="GROUP_LABELS_AT_BOTTOM">Group Labels at Bottom:</label></dt>
+    <dd>
+        <select id="GROUP_LABELS_AT_BOTTOM" name="GROUP_LABELS_AT_BOTTOM">
+            <option value="true" <?= ($settings['GROUP_LABELS_AT_BOTTOM'] ?? 'true') === 'true' ? 'selected' : '' ?>>Enabled (Recommended — Clean Template)</option>
+            <option value="false" <?= ($settings['GROUP_LABELS_AT_BOTTOM'] ?? 'true') === 'false' ? 'selected' : '' ?>>Disabled</option>
+        </select>
+        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Consolidates all Homepage labels into a clean, logically-ordered block at the bottom of the container XML template below ports and paths.</span>
+    </dd>
+
+    <dt><label for="HOMEPAGE_SERVICES_FILE_PATH">Homepage services.yaml Path:</label></dt>
+    <dd>
+        <input type="text" id="HOMEPAGE_SERVICES_FILE_PATH" name="HOMEPAGE_SERVICES_FILE_PATH" value="<?= htmlspecialchars($settings['HOMEPAGE_SERVICES_FILE_PATH'] ?? '/mnt/user/appdata/homepage/config/services.yaml') ?>" placeholder="/mnt/user/appdata/homepage/config/services.yaml">
+        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Target path for 1-click synchronization to Homepage's <code>services.yaml</code> file in appdata.</span>
+    </dd>
+</dl>
+
+<div class="title"><span class="left"><i class="fa fa-picture-o"></i> Custom Local Icons & Images</span></div>
+<dl>
+    <dt><label for="CUSTOM_ICONS_HOST_DIR">Custom Icons Host Directory:</label></dt>
+    <dd>
+        <input type="text" id="CUSTOM_ICONS_HOST_DIR" name="CUSTOM_ICONS_HOST_DIR" value="<?= htmlspecialchars($settings['CUSTOM_ICONS_HOST_DIR'] ?? '') ?>" placeholder="/mnt/user/metadata/icons">
+        <?php
+        $iconDir = $settings['CUSTOM_ICONS_HOST_DIR'] ?? '';
+        if (!empty($iconDir)) {
+            if (is_dir($iconDir)) {
+                $iconCount = count(glob(rtrim($iconDir, '/') . '/*.{png,svg,webp,jpg,jpeg,ico,PNG,SVG,WEBP,JPG,JPEG,ICO}', GLOB_BRACE) ?: []);
+                echo '<span class="green-text" style="display:block;margin-top:4px;font-size:0.85em;font-weight:600;"><i class="fa fa-check-circle"></i> Directory accessible (' . $iconCount . ' icon file(s) found)</span>';
+            } else {
+                echo '<span class="red-text" style="display:block;margin-top:4px;font-size:0.85em;font-weight:600;"><i class="fa fa-exclamation-triangle"></i> Directory does not exist or is inaccessible</span>';
+            }
+        }
+        ?>
+        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Host path where your custom icons/images are stored (e.g., <code>/mnt/user/metadata/icons</code> or <code>/mnt/user/metadata/images</code>).</span>
+    </dd>
+
+    <dt><label for="CUSTOM_ICONS_URL_PREFIX">Homepage Container Icon Prefix:</label></dt>
+    <dd>
+        <input type="text" id="CUSTOM_ICONS_URL_PREFIX" name="CUSTOM_ICONS_URL_PREFIX" value="<?= htmlspecialchars($settings['CUSTOM_ICONS_URL_PREFIX'] ?? '/icons/') ?>" placeholder="/icons/">
+        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">URL prefix mapped inside Homepage container (e.g., <code>/icons/</code> if host directory is mounted to <code>/app/public/icons</code>, or <code>/images/</code> if mounted to <code>/app/public/images</code>).</span>
+    </dd>
+</dl>
+
+<div class="title"><span class="left"><i class="fa fa-text-height"></i> Interface & Readability</span></div>
+<dl>
+    <dt><label for="UI_FONT_SCALE">UI & Font Scale:</label></dt>
+    <dd>
+        <select id="UI_FONT_SCALE" name="UI_FONT_SCALE" onchange="homepagePreviewScale(this.value)">
+            <option value="100" <?= ($settings['UI_FONT_SCALE'] ?? '100') === '100' ? 'selected' : '' ?>>100% — Default (Unraid Native)</option>
+            <option value="110" <?= ($settings['UI_FONT_SCALE'] ?? '100') === '110' ? 'selected' : '' ?>>110% — Medium (+10%)</option>
+            <option value="125" <?= ($settings['UI_FONT_SCALE'] ?? '100') === '125' ? 'selected' : '' ?>>125% — Large (+25%)</option>
+            <option value="140" <?= ($settings['UI_FONT_SCALE'] ?? '100') === '140' ? 'selected' : '' ?>>140% — Extra Large (+40%)</option>
+        </select>
+        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Adjusts overall text size, padding, and UI element scaling across the dashboard and label editor.</span>
+    </dd>
+
+    <dt><label for="DOCKER_EDIT_OVERLAY">Docker Edit Page Overlay Editor:</label></dt>
+    <dd>
+        <select id="DOCKER_EDIT_OVERLAY" name="DOCKER_EDIT_OVERLAY">
+            <option value="true" <?= ($settings['DOCKER_EDIT_OVERLAY'] ?? 'true') === 'true' ? 'selected' : '' ?>>Enabled (Recommended — In-Page Overlay Modal)</option>
+            <option value="false" <?= ($settings['DOCKER_EDIT_OVERLAY'] ?? 'true') === 'false' ? 'selected' : '' ?>>Disabled (Full Page Link Only)</option>
+        </select>
+        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Adds an <strong>Overlay Editor</strong> button inside Unraid's native Docker Add/Update Container pages so you can edit Homepage labels in a popup modal without leaving the template page.</span>
+    </dd>
+</dl>
+
+<div class="title"><span class="left"><i class="fa fa-stethoscope"></i> Homepage Health Check</span></div>
+<dl>
+    <dt>Homepage Container (<?= htmlspecialchars($healthData['containerName'] ?? 'homepage') ?>):</dt>
+    <dd>
+        <?= $healthData['running']
+            ? '<span class="green-text" style="font-weight:600;"><i class="fa fa-check-circle"></i> Running</span>'
+            : '<span class="red-text" style="font-weight:600;"><i class="fa fa-exclamation-circle"></i> Not Running</span>'
+        ?>
+    </dd>
+
+    <dt>Docker Integration:</dt>
+    <dd>
+        <?php if (!empty($healthData['socketMounted'])): ?>
+            <?php if (($healthData['connectionType'] ?? '') === 'proxy'): ?>
+                <span class="green-text" style="font-weight:600;"><i class="fa fa-check-circle"></i> Socket Proxy (<?= htmlspecialchars($healthData['connectionDetail'] ?: 'DOCKER_HOST') ?>)</span>
+            <?php else: ?>
+                <span class="green-text" style="font-weight:600;"><i class="fa fa-check-circle"></i> Unix Socket (<?= htmlspecialchars($healthData['connectionDetail'] ?: '/var/run/docker.sock') ?>)</span>
+            <?php endif; ?>
+        <?php else: ?>
+            <span class="red-text" style="font-weight:600;"><i class="fa fa-exclamation-triangle"></i> Not detected — No /var/run/docker.sock or DOCKER_HOST variable found</span>
+        <?php endif; ?>
+    </dd>
+</dl>
+
+<div class="title"><span class="left"><i class="fa fa-life-ring"></i> Support &amp; Diagnostics</span></div>
+<dl>
+    <dt>Support &amp; Backup Bundle:</dt>
+    <dd>
+        <button type="button" class="button" onclick="document.getElementById('form-support-bundle').submit()"><i class="fa fa-download"></i> Download Support &amp; Backup Bundle</button>
+        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Exports an anonymized diagnostic bundle containing your plugin settings, template discovery metadata, and custom presets for troubleshooting.</span>
+    </dd>
+</dl>
+
+<br>
+<input type="submit" id="btn-submit-settings" name="submit_settings" value="Apply">
+<a href="/Settings/HomepageLabels" id="btn-done-settings" class="button" style="display:inline-block;margin-left:8px;text-decoration:none;">Done</a>
+</form>
+
+<form id="form-support-bundle" method="POST" style="display:none;">
+    <input type="hidden" name="action" value="download_support_bundle">
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($var['csrf_token'] ?? $_SESSION['csrf_token'] ?? '') ?>">
+</form>
+
+</div><!-- /.homepage-root -->
+
+<script>
+function homepagePreviewScale(scale) {
+    $('.homepage-root')
+        .removeClass('homepage-scale-100 homepage-scale-110 homepage-scale-125 homepage-scale-140')
+        .addClass('homepage-scale-' + scale);
+}
+</script>

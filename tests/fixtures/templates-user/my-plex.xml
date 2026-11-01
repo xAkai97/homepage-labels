@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>plex</Name>
+  <Repository>linuxserver/plex:latest</Repository>
+  <Registry>https://hub.docker.com/r/linuxserver/plex/</Registry>
+  <Network>bridge</Network>
+  <MyPath>templates-user/my-plex.xml</MyPath>
+  <Privileged>false</Privileged>
+  <Support>https://forums.unraid.net/</Support>
+  <Project>https://plex.tv</Project>
+  <Overview>Plex Media Server</Overview>
+  <Category>MediaApp:Video MediaServer:Video</Category>
+  <WebUI>http://[IP]:[PORT:32400]/web</WebUI>
+  <TemplateURL>false</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/plex-icon.png</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled>1690000000</DateInstalled>
+  <DonateText/>
+  <DonateLink/>
+  <Description>Plex Media Server</Description>
+  <Networking>
+    <Mode>bridge</Mode>
+    <Publish>
+      <Port>
+        <HostPort>32400</HostPort>
+        <ContainerPort>32400</ContainerPort>
+        <Protocol>tcp</Protocol>
+      </Port>
+    </Publish>
+  </Networking>
+  <Data>
+    <Volume>
+      <HostDir>/mnt/user/appdata/plex</HostDir>
+      <ContainerDir>/config</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+  </Data>
+  <Environment/>
+  <Labels/>
+  <Config Name="WebUI Port" Target="32400" Default="32400" Mode="tcp" Description="Plex web port" Type="Port" Display="always" Required="true" Mask="false">32400</Config>
+  <Config Name="Appdata" Target="/config" Default="/mnt/user/appdata/plex" Mode="rw" Description="Config path" Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/plex</Config>
+</Container>
