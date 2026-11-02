@@ -9,7 +9,8 @@ This document outlines the file layout, runtime data paths, and subsystem respon
 ├── settings.cfg              # Persistent plugin settings (INI format)
 ├── user_templates.json       # Custom user templates
 ├── custom_presets.json       # Optional custom preset overrides
-└── backups/                  # Safety backups before imports and removals
+├── pending_recreates.json    # Containers whose template changed but were not yet recreated
+└── backups/                  # Label snapshots for undo/restore and pre-import template backups
 
 /usr/local/emhttp/plugins/homepage-labels/
 ├── HomepageLabels.page        # Main dashboard and visual editor WebGUI
@@ -44,11 +45,11 @@ Key behaviors:
 
 ### 2. Preset & Resolution Engine (`include/preset_engine.php`)
 
-Matches Docker repositories and container names to known application presets:
-- Match hierarchy: Exact repository match -> Alias match -> Image tail keyword match -> Container name match.
+Matches Docker repositories to known application presets:
+- Match hierarchy: Exact repository key -> Alias match -> Image name keyword (registry and tag stripped).
 - Placeholders: Automatically resolves `[IP]`, `[PORT:xxxx]`, and container network names.
 - IPv6 support: Automatically wraps IPv6 addresses in RFC 2732 bracket notation (`[2001:db8::1]`).
-- Connection tester: Probes HTTP/HTTPS endpoints with latency measurement and SSRF protection (private IP validation).
+- Connection tester: Probes endpoints with latency measurement. Only `http` and `https` schemes are allowed, including on redirects. Private/LAN addresses are intentionally permitted, since homelab services live there.
 - YAML exporter: Translates active containers into valid Homepage `services.yaml` configuration.
 
 ### 3. Native Docker Template Integration (`HomepageLabelsHook.page`)

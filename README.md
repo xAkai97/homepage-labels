@@ -58,11 +58,11 @@ Instead of manually editing Docker template XML files or remembering Homepage la
    - **Base Host IP**: The IP address of your Unraid server.
    - **URL Scheme**: `http` or `https`.
    - **Homepage Container Name**: The name of your running Homepage container (default: `homepage`).
-4. Click **Apply Settings**. The health status indicator will confirm whether the Homepage container and Docker socket connection are active.
+4. Click **Apply**. The health status indicator will confirm whether the Homepage container and Docker socket connection are active.
 
 ### 2. Configuring a Container
 1. On the **Dashboard & Labels** tab, click **Edit Labels** next to any container.
-2. If a preset matches your container, click **Apply Preset** to populate recommended fields.
+2. Matching presets are detected automatically. To use a different one, pick a preset or saved template from the template dropdown at the top of the editor and click **Apply**.
 3. Enter any required credentials or API keys.
 4. Choose an action:
    - **Save XML Only**: Updates the container template without restarting the running container.
