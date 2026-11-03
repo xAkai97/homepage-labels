@@ -84,14 +84,24 @@ function collectFormLabels($formLabels, $formMasks, $formConfigs, $enableWidget)
 $settings = loadPluginSettings();
 
 // Load Unraid emhttp runtime variables if running standalone
-if (!isset($var) && file_exists('/var/local/emhttp/var.ini')) {
-    $var = @parse_ini_file('/var/local/emhttp/var.ini', false, INI_SCANNER_RAW) ?: [];
-}
-if (!isset($var)) {
-    $var = [];
+if (!isset($var) || !is_array($var)) {
+    if (isset($GLOBALS['var']) && is_array($GLOBALS['var'])) {
+        $var = &$GLOBALS['var'];
+    } elseif (file_exists('/var/local/emhttp/var.ini')) {
+        $var = @parse_ini_file('/var/local/emhttp/var.ini', false, INI_SCANNER_RAW) ?: [];
+    } else {
+        $var = [];
+    }
 }
 if (session_status() === PHP_SESSION_NONE) {
     @session_start();
+}
+if (empty($var['csrf_token'])) {
+    $var['csrf_token'] = $GLOBALS['var']['csrf_token']
+        ?? $_SESSION['csrf_token']
+        ?? (file_exists('/var/local/emhttp/var.ini') ? (@parse_ini_file('/var/local/emhttp/var.ini', false, INI_SCANNER_RAW)['csrf_token'] ?? null) : null)
+        ?? $_COOKIE['csrf_token']
+        ?? '';
 }
 
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
@@ -99,7 +109,12 @@ $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
 // Validate CSRF token for state-modifying actions if running in authenticated Unraid context
 $modifyingActions = ['save', 'disable', 'restore', 'template_clone', 'template_save', 'template_rename', 'template_delete', 'template_apply', 'save_scale', 'batch_enable', 'batch_disable', 'batch_apply_template', 'recreate_single', 'export_templates', 'import_templates', 'test_connection', 'batch_set_group', 'export_services_yaml', 'sync_services_yaml'];
 if (in_array($action, $modifyingActions, true)) {
-    $sessionToken = $var['csrf_token'] ?? $_SESSION['csrf_token'] ?? null;
+    $sessionToken = $var['csrf_token']
+        ?? $GLOBALS['var']['csrf_token']
+        ?? $_SESSION['csrf_token']
+        ?? (file_exists('/var/local/emhttp/var.ini') ? (@parse_ini_file('/var/local/emhttp/var.ini', false, INI_SCANNER_RAW)['csrf_token'] ?? null) : null)
+        ?? $_COOKIE['csrf_token']
+        ?? null;
     $providedToken = $_POST['csrf_token'] ?? $_REQUEST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
     if (empty($sessionToken) || empty($providedToken) || !hash_equals((string)$sessionToken, (string)$providedToken)) {
         http_response_code(403);

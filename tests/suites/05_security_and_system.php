@@ -153,9 +153,12 @@ test('apply_labels.php enforces fail-closed CSRF and POST-only recreate_single',
     assertTrue(strpos($script, 'empty($sessionToken) || empty($providedToken)') !== false, 'CSRF check is fail-closed');
     assertTrue(strpos($script, '$_POST[\'container\']') !== false, 'recreate_single reads container from $_POST');
     assertFalse(strpos($script, '$_REQUEST[\'container\']') !== false, 'recreate_single does not read from $_REQUEST');
+    assertTrue(strpos($script, 'parse_ini_file(\'/var/local/emhttp/var.ini\'') !== false, 'Runtime var.ini is loaded in standalone context');
 
     $settingsPage = file_get_contents(dirname(__DIR__, 2) . '/src/usr/local/emhttp/plugins/homepage-labels/HomepageLabelsSettings.page');
     assertTrue(strpos($settingsPage, 'empty($sessionToken) || empty($providedToken)') !== false, 'Settings page CSRF check is fail-closed');
+    assertTrue(strpos($settingsPage, '$GLOBALS[\'var\'][\'csrf_token\']') !== false, 'Settings page supports GLOBALS csrf_token');
+    assertTrue(strpos($settingsPage, 'homepageResolveCsrfToken') !== false, 'Settings page client-side token resolver is present');
     return true;
 });
 

@@ -18,6 +18,27 @@ Markdown="false"
 require_once '/usr/local/emhttp/plugins/homepage-labels/include/preset_engine.php';
 require_once '/usr/local/emhttp/plugins/homepage-labels/include/view_components.php';
 
+// Ensure Unraid emhttp runtime variables are initialized
+if (!isset($var) || !is_array($var)) {
+    if (isset($GLOBALS['var']) && is_array($GLOBALS['var'])) {
+        $var = &$GLOBALS['var'];
+    } elseif (file_exists('/var/local/emhttp/var.ini')) {
+        $var = @parse_ini_file('/var/local/emhttp/var.ini', false, INI_SCANNER_RAW) ?: [];
+    } else {
+        $var = [];
+    }
+}
+if (session_status() === PHP_SESSION_NONE) {
+    @session_start();
+}
+if (empty($var['csrf_token'])) {
+    $var['csrf_token'] = $GLOBALS['var']['csrf_token']
+        ?? $_SESSION['csrf_token']
+        ?? (file_exists('/var/local/emhttp/var.ini') ? (@parse_ini_file('/var/local/emhttp/var.ini', false, INI_SCANNER_RAW)['csrf_token'] ?? null) : null)
+        ?? $_COOKIE['csrf_token']
+        ?? '';
+}
+
 $settingsPath = defined('PLUGIN_SETTINGS_PATH') ? PLUGIN_SETTINGS_PATH : '/boot/config/plugins/homepage-labels/settings.cfg';
 $defaults = getDefaultPluginSettings();
 
@@ -26,7 +47,12 @@ $settings = loadPluginSettings($settingsPath);
 
 // Handle Support Bundle Download
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'download_support_bundle') {
-    $sessionToken = $var['csrf_token'] ?? $_SESSION['csrf_token'] ?? null;
+    $sessionToken = $var['csrf_token']
+        ?? $GLOBALS['var']['csrf_token']
+        ?? $_SESSION['csrf_token']
+        ?? (file_exists('/var/local/emhttp/var.ini') ? (@parse_ini_file('/var/local/emhttp/var.ini', false, INI_SCANNER_RAW)['csrf_token'] ?? null) : null)
+        ?? $_COOKIE['csrf_token']
+        ?? null;
     $providedToken = $_POST['csrf_token'] ?? '';
     if (empty($sessionToken) || empty($providedToken) || !hash_equals((string)$sessionToken, (string)$providedToken)) {
         http_response_code(403);
@@ -78,7 +104,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 $saved = false;
 $saveError = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_settings') {
-    $sessionToken = $var['csrf_token'] ?? $_SESSION['csrf_token'] ?? null;
+    $sessionToken = $var['csrf_token']
+        ?? $GLOBALS['var']['csrf_token']
+        ?? $_SESSION['csrf_token']
+        ?? (file_exists('/var/local/emhttp/var.ini') ? (@parse_ini_file('/var/local/emhttp/var.ini', false, INI_SCANNER_RAW)['csrf_token'] ?? null) : null)
+        ?? $_COOKIE['csrf_token']
+        ?? null;
     $providedToken = $_POST['csrf_token'] ?? '';
     if (empty($sessionToken) || empty($providedToken) || !hash_equals((string)$sessionToken, (string)$providedToken)) {
         $saveError = 'Invalid CSRF token. Please refresh the page and try again.';
@@ -364,4 +395,37 @@ function homepagePreviewScale(scale) {
         .removeClass('homepage-scale-100 homepage-scale-110 homepage-scale-125 homepage-scale-140')
         .addClass('homepage-scale-' + scale);
 }
+
+$(function() {
+    function homepageResolveCsrfToken() {
+        var existing = $('#settings-csrf-token').val();
+        if (existing) return existing;
+        if (typeof csrf_token !== 'undefined' && csrf_token) return csrf_token;
+        if (window.csrf_token) return window.csrf_token;
+        if (typeof $.cookie === 'function') {
+            var c = $.cookie('csrf_token');
+            if (c) return c;
+        }
+        var m = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+        return m ? decodeURIComponent(m[1]) : '';
+    }
+
+    var token = homepageResolveCsrfToken();
+    if (token) {
+        if (!$('#settings-csrf-token').val()) {
+            $('#settings-csrf-token').val(token);
+        }
+        $('input[name="csrf_token"]').each(function() {
+            if (!$(this).val()) $(this).val(token);
+        });
+    }
+
+    $('form').on('submit', function() {
+        var $tInput = $(this).find('input[name="csrf_token"]');
+        if ($tInput.length && !$tInput.val()) {
+            var t = homepageResolveCsrfToken();
+            if (t) $tInput.val(t);
+        }
+    });
+});
 </script>

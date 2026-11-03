@@ -16,6 +16,27 @@ require_once '/usr/local/emhttp/plugins/homepage-labels/include/xml_parser.php';
 require_once '/usr/local/emhttp/plugins/homepage-labels/include/preset_engine.php';
 require_once '/usr/local/emhttp/plugins/homepage-labels/include/view_components.php';
 
+// Ensure Unraid emhttp runtime variables are initialized
+if (!isset($var) || !is_array($var)) {
+    if (isset($GLOBALS['var']) && is_array($GLOBALS['var'])) {
+        $var = &$GLOBALS['var'];
+    } elseif (file_exists('/var/local/emhttp/var.ini')) {
+        $var = @parse_ini_file('/var/local/emhttp/var.ini', false, INI_SCANNER_RAW) ?: [];
+    } else {
+        $var = [];
+    }
+}
+if (session_status() === PHP_SESSION_NONE) {
+    @session_start();
+}
+if (empty($var['csrf_token'])) {
+    $var['csrf_token'] = $GLOBALS['var']['csrf_token']
+        ?? $_SESSION['csrf_token']
+        ?? (file_exists('/var/local/emhttp/var.ini') ? (@parse_ini_file('/var/local/emhttp/var.ini', false, INI_SCANNER_RAW)['csrf_token'] ?? null) : null)
+        ?? $_COOKIE['csrf_token']
+        ?? '';
+}
+
 // Delegate Global Settings tab & POST actions to HomepageLabelsSettings.page
 $isSettingsTab = (($_GET['tab'] ?? '') === 'settings') ||
     (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && in_array($_POST['action'] ?? '', ['save_settings', 'download_support_bundle'], true));
@@ -2452,9 +2473,11 @@ var csrf_token = "<?= htmlspecialchars($var['csrf_token'] ?? $_SESSION['csrf_tok
 var isEmbedMode = <?= $isEmbed ? 'true' : 'false' ?>;
 
 function homepageGetCsrfToken() {
+    var m = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+    var cookieToken = m ? decodeURIComponent(m[1]) : '';
     return (typeof csrf_token !== 'undefined' && csrf_token)
         ? csrf_token
-        : (window.csrf_token || (typeof $.cookie === 'function' ? $.cookie('csrf_token') : '') || $('#homepage-csrf-token').val() || $('input[name="csrf_token"]').val() || '');
+        : (window.csrf_token || (typeof $.cookie === 'function' ? $.cookie('csrf_token') : '') || cookieToken || $('#homepage-csrf-token').val() || $('input[name="csrf_token"]').val() || '');
 }
 
 var currentSortMode = 'active_first';

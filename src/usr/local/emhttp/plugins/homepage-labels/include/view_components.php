@@ -660,7 +660,7 @@ function renderEditorForm($containerName, $labels, $preset, $presetList, $groupS
     // --- Template Toolbar ---
     $html .= renderTemplateToolbar($presetList, $userTemplates, $settings);
 
-    $csrfToken = htmlspecialchars($GLOBALS['var']['csrf_token'] ?? $_SESSION['csrf_token'] ?? '');
+    $csrfToken = htmlspecialchars($GLOBALS['var']['csrf_token'] ?? $var['csrf_token'] ?? $_SESSION['csrf_token'] ?? $_COOKIE['csrf_token'] ?? '');
     $html .= '<form id="homepage-editor-form" method="POST">' . "\n";
     $html .= '<input type="hidden" id="homepage-container-name" name="container" value="' . $safeName . '">' . "\n";
     $html .= '<input type="hidden" id="homepage-csrf-token" name="csrf_token" value="' . $csrfToken . '">' . "\n";
