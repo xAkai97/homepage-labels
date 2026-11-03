@@ -1,6 +1,4 @@
 Menu="Buttons:99"
-Link="hp-hook"
-Cond="preg_match('/AddContainer|UpdateContainer/', $_SERVER['REQUEST_URI'] ?? '')"
 Markdown="false"
 ---
 <?php
@@ -164,6 +162,11 @@ if (file_exists($presetEnginePath)) {
 
 <script>
 (function() {
+    // Only execute on Docker AddContainer or UpdateContainer pages
+    if (!/AddContainer|UpdateContainer/i.test(window.location.href)) {
+        return;
+    }
+
     var overlayEnabled = <?= $overlayEnabled ? 'true' : 'false' ?>;
 
     /**
@@ -186,12 +189,11 @@ if (file_exists($presetEnginePath)) {
         return '';
     }
 
-    $(function() {
-        var $form = $('form#docker_form, form[name="docker_form"]');
-        if (!$form.length) {
-            $form = $('form[action*="UpdateContainer"], form[action*="AddContainer"]');
-        }
-        if (!$form.length) return;
+    function hpAttachHookRow() {
+        if ($('#hp-bottom-hook-row').length) return true;
+
+        var $form = $('form#docker_form, form[name="docker_form"], form[action*="Container"], form');
+        if (!$form.length) return false;
 
         // Count existing homepage labels in the form
         var labelCount = 0;
@@ -215,7 +217,7 @@ if (file_exists($presetEnginePath)) {
 
         var initialLinkHtml = (labelCount > 0 || disabledLabelCount > 0)
             ? '<i class="fa fa-tags"></i> Edit Homepage Labels'
-            : '<i class="fa fa-plus-square"></i> Add Homepage Labels';
+            : '<i class="fa fa-tags"></i> Add Homepage Labels';
 
         var $addLink = $('<a>')
             .attr('href', '#')
@@ -259,19 +261,34 @@ if (file_exists($presetEnginePath)) {
         $rowWrap.append($notice);
 
         // Place right under Unraid's "Add another Path, Port, Variable, Label or Device" link
-        var $addConfigLink = $form.find('a[onclick*="addConfigPopup"], a:contains("Add another Path, Port, Variable, Label or Device")').first();
+        var $addConfigLink = $('a[onclick*="addConfigPopup"], a[onclick*="addConfig"], a:contains("Add another Path, Port, Variable, Label or Device"), a:contains("Add another Path")').first();
         if ($addConfigLink.length) {
             $rowWrap.insertAfter($addConfigLink);
-        } else {
-            // Resilient fallback if Unraid changes the Add Config link in a future release
-            var $submitRow = $form.find('#docker_buttons, input[type="submit"], button[type="submit"]').first().closest('dl, div, tr');
-            if ($submitRow.length) {
-                var $fallbackDl = $('<dl><dt>&nbsp;</dt><dd></dd></dl>');
-                $fallbackDl.find('dd').append($rowWrap);
-                $fallbackDl.insertBefore($submitRow);
-            } else {
-                $form.append($rowWrap);
-            }
+            return true;
+        }
+
+        // Resilient fallback if Unraid changes the Add Config link in a future release
+        var $submitRow = $('#docker_buttons, input[type="submit"], button[type="submit"]').first().closest('dl, div, tr');
+        if ($submitRow.length) {
+            var $fallbackDl = $('<dl><dt>&nbsp;</dt><dd></dd></dl>');
+            $fallbackDl.find('dd').append($rowWrap);
+            $fallbackDl.insertBefore($submitRow);
+            return true;
+        }
+
+        $form.append($rowWrap);
+        return true;
+    }
+
+    $(function() {
+        if (!hpAttachHookRow()) {
+            var retries = 0;
+            var timer = setInterval(function() {
+                retries++;
+                if (hpAttachHookRow() || retries > 15) {
+                    clearInterval(timer);
+                }
+            }, 250);
         }
     });
 
