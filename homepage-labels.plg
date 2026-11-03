@@ -24,12 +24,12 @@
 
 <CHANGES>
 ###2026.11.02
-- Multi-Source Icon Discovery &amp; Documentation Link: Replaced built-in icon browser with direct link to official Homepage icon documentation; added live preview resolution for Simple Icons (si-), Selfh.st (sh-), Material Design Icons (mdi-), Walkxcode, and local icons
-- Fail-Closed Multi-Source CSRF Resolution: Resolved CSRF token across $var, $GLOBALS, var.ini, PHP sessions, and cookies in Settings and AJAX handlers with client-side form sync
-- Settings UX Improvements: Aligned Apply and Done buttons center-left in the &lt;dd&gt; input column; added dedicated action buttons per configuration category
-- Native Docker Editor Hook Reliability: Removed restrictive frontmatter condition and added dynamic retry attachment ensuring "Add Homepage Labels" appears reliably in AddContainer/UpdateContainer views
-- UI Polish &amp; Alignment: Balanced left padding on ALL filter pill to prevent container curvature collision; removed duplicate settings button from dashboard toolbar
-- Documentation &amp; Schema Sync: Aligned user template and custom preset JSON schemas, architecture specifications, and Quick Start guides
+- Fix: Resolved CSRF token across globals, var.ini, and cookies in settings form (1be5581)
+- Fix: Removed premature Cond header and added resilient retry attachment for Docker edit hook (3e3d5aa)
+- UI: Aligned settings buttons in dd column per category and removed redundant dashboard settings button (cc92ec6)
+- UI: Adjusted left padding on ALL quick filter pill and capsule container (4f164e3)
+- Docs: Streamlined emhttp plugin README to concise description for Plugins manager (a5767eb)
+- Docs: Aligned template schemas, architecture details, and quick start labels (39c8c3c)
 
 ###2026.10.31
 - Unified Tabbed Interface (Option 2): Consolidated Dashboard &amp; Global Settings under a single User Utilities icon with top tab navigation
