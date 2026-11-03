@@ -2454,7 +2454,6 @@ if ($editContainer) {
         '</select></div>';
     echo '<button type="button" class="homepage-btn homepage-btn--config" onclick="homepageExportServicesYaml()" title="Export active containers to services.yaml"><i class="fa fa-download"></i> services.yaml</button>';
     echo '<button type="button" class="homepage-btn homepage-btn--config" onclick="homepageSyncServicesYaml()" title="Direct-sync active containers to Homepage services.yaml in appdata"><i class="fa fa-refresh"></i> Sync services.yaml</button>';
-    echo '<a href="/Settings/HomepageLabels?tab=settings" class="homepage-btn homepage-btn--settings"><i class="fa fa-cog"></i> Settings</a>';
     echo '</div>';
     echo '</div>';
 

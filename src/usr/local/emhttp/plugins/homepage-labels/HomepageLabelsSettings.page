@@ -236,6 +236,12 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
         </select>
         <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;"><strong>Host IP:Port</strong> — Uses your server IP with mapped host ports.<br><strong>Container Name:Port</strong> — Uses Docker DNS (requires shared network).</span>
     </dd>
+
+    <dt>&nbsp;</dt>
+    <dd>
+        <input type="submit" name="submit_settings" value="Apply">
+        <a href="/Settings/HomepageLabels" class="button" style="display:inline-block;margin-left:8px;text-decoration:none;">Done</a>
+    </dd>
 </dl>
 
 <div class="title"><span class="left"><i class="fa fa-shield"></i> Security</span></div>
@@ -247,6 +253,12 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
             <option value="false" <?= $settings['DEFAULT_MASK_SECRETS'] === 'false' ? 'selected' : '' ?>>Disabled</option>
         </select>
         <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Automatically set Mask="true" on key, password, and token fields in Unraid Docker edit UI.</span>
+    </dd>
+
+    <dt>&nbsp;</dt>
+    <dd>
+        <input type="submit" name="submit_settings" value="Apply">
+        <a href="/Settings/HomepageLabels" class="button" style="display:inline-block;margin-left:8px;text-decoration:none;">Done</a>
     </dd>
 </dl>
 
@@ -293,6 +305,12 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
         <input type="text" id="HOMEPAGE_SERVICES_FILE_PATH" name="HOMEPAGE_SERVICES_FILE_PATH" value="<?= htmlspecialchars($settings['HOMEPAGE_SERVICES_FILE_PATH'] ?? '/mnt/user/appdata/homepage/config/services.yaml') ?>" placeholder="/mnt/user/appdata/homepage/config/services.yaml">
         <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Target path for 1-click synchronization to Homepage's <code>services.yaml</code> file in appdata.</span>
     </dd>
+
+    <dt>&nbsp;</dt>
+    <dd>
+        <input type="submit" name="submit_settings" value="Apply">
+        <a href="/Settings/HomepageLabels" class="button" style="display:inline-block;margin-left:8px;text-decoration:none;">Done</a>
+    </dd>
 </dl>
 
 <div class="title"><span class="left"><i class="fa fa-picture-o"></i> Custom Local Icons & Images</span></div>
@@ -319,6 +337,12 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
         <input type="text" id="CUSTOM_ICONS_URL_PREFIX" name="CUSTOM_ICONS_URL_PREFIX" value="<?= htmlspecialchars($settings['CUSTOM_ICONS_URL_PREFIX'] ?? '/icons/') ?>" placeholder="/icons/">
         <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">URL prefix mapped inside Homepage container (e.g., <code>/icons/</code> if host directory is mounted to <code>/app/public/icons</code>, or <code>/images/</code> if mounted to <code>/app/public/images</code>).</span>
     </dd>
+
+    <dt>&nbsp;</dt>
+    <dd>
+        <input type="submit" name="submit_settings" value="Apply">
+        <a href="/Settings/HomepageLabels" class="button" style="display:inline-block;margin-left:8px;text-decoration:none;">Done</a>
+    </dd>
 </dl>
 
 <div class="title"><span class="left"><i class="fa fa-text-height"></i> Interface & Readability</span></div>
@@ -341,6 +365,12 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
             <option value="false" <?= ($settings['DOCKER_EDIT_OVERLAY'] ?? 'true') === 'false' ? 'selected' : '' ?>>Disabled (Full Page Link Only)</option>
         </select>
         <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Adds an <strong>Overlay Editor</strong> button inside Unraid's native Docker Add/Update Container pages so you can edit Homepage labels in a popup modal without leaving the template page.</span>
+    </dd>
+
+    <dt>&nbsp;</dt>
+    <dd>
+        <input type="submit" name="submit_settings" value="Apply">
+        <a href="/Settings/HomepageLabels" class="button" style="display:inline-block;margin-left:8px;text-decoration:none;">Done</a>
     </dd>
 </dl>
 
@@ -377,9 +407,13 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
     </dd>
 </dl>
 
-<br>
-<input type="submit" id="btn-submit-settings" name="submit_settings" value="Apply">
-<a href="/Settings/HomepageLabels" id="btn-done-settings" class="button" style="display:inline-block;margin-left:8px;text-decoration:none;">Done</a>
+<dl>
+    <dt>&nbsp;</dt>
+    <dd>
+        <input type="submit" id="btn-submit-settings" name="submit_settings" value="Apply">
+        <a href="/Settings/HomepageLabels" id="btn-done-settings" class="button" style="display:inline-block;margin-left:8px;text-decoration:none;">Done</a>
+    </dd>
+</dl>
 </form>
 
 <form id="form-support-bundle" method="POST" style="display:none;">
