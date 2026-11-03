@@ -24,7 +24,6 @@ if (file_exists($presetEnginePath)) {
 
 <style>
 .hp-bottom-hook-row {
-    margin-top: 6px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -258,9 +257,16 @@ if (file_exists($presetEnginePath)) {
         var $notice = $('<span>').attr('id', 'hp-native-notice').css('display', 'none');
         $rowWrap.append($notice);
 
-        // Place right under Unraid's "Add another Path, Port, Variable, Label or Device" link
+        // Place in its own native <dt>&nbsp;</dt><dd> row directly under "Add another Path, Port, Variable, Label or Device"
         var $addConfigLink = $('a[onclick*="addConfigPopup"], a[onclick*="addConfig"], a:contains("Add another Path, Port, Variable, Label or Device"), a:contains("Add another Path")').first();
         if ($addConfigLink.length) {
+            var $targetDd = $addConfigLink.closest('dd');
+            if ($targetDd.length) {
+                var $newDt = $('<dt>&nbsp;</dt>');
+                var $newDd = $('<dd>').append($rowWrap);
+                $targetDd.after($newDt, $newDd);
+                return true;
+            }
             $rowWrap.insertAfter($addConfigLink);
             return true;
         }
