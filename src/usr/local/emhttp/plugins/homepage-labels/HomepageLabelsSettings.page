@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     require_once '/usr/local/emhttp/plugins/homepage-labels/include/xml_parser.php';
     $bundleData = [
         'generated_at'   => date('Y-m-d H:i:s'),
-        'plugin_version' => '2026.10.31',
+        'plugin_version' => '2026.11.02',
         'php_version'    => PHP_VERSION,
         'os'             => PHP_OS,
         'settings'       => $settings,
