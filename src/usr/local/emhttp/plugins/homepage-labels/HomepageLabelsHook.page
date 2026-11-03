@@ -24,7 +24,7 @@ if (file_exists($presetEnginePath)) {
 
 <style>
 .hp-bottom-hook-row {
-    margin-top: 8px;
+    margin-top: 6px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -32,12 +32,10 @@ if (file_exists($presetEnginePath)) {
     font-family: inherit;
 }
 .hp-add-labels-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: normal;
     text-decoration: none;
+    font-size: inherit;
 }
 .hp-add-labels-link:hover {
     text-decoration: underline;
@@ -216,11 +214,11 @@ if (file_exists($presetEnginePath)) {
         var $rowWrap = $('<div>').attr('id', 'hp-bottom-hook-row').addClass('hp-bottom-hook-row');
 
         var initialLinkHtml = (labelCount > 0 || disabledLabelCount > 0)
-            ? '<i class="fa fa-tags"></i> Edit Homepage Labels'
-            : '<i class="fa fa-tags"></i> Add Homepage Labels';
+            ? '<i class="fa fa-fw fa-tags"></i> Edit Homepage Labels'
+            : '<i class="fa fa-fw fa-tags"></i> Add Homepage Labels';
 
         var $addLink = $('<a>')
-            .attr('href', '#')
+            .attr('href', 'javascript:void(0);')
             .attr('id', 'hp-add-labels-link')
             .addClass('hp-add-labels-link')
             .html(initialLinkHtml)
@@ -242,7 +240,7 @@ if (file_exists($presetEnginePath)) {
         if (labelCount > 0) {
             $rowWrap.append($('<span>').addClass('hp-native-badge hp-native-badge--active').text(labelCount + ' Active'));
             $rowWrap.append(
-                $('<a>').attr('href', '#').attr('id', 'hp-native-toggle-btn').addClass('hp-native-toggle-link')
+                $('<a>').attr('href', 'javascript:void(0);').attr('id', 'hp-native-toggle-btn').addClass('hp-native-toggle-link')
                     .attr('title', 'Pause discovery using Disabled:Label without deleting labels')
                     .html('<i class="fa fa-pause-circle"></i> Pause')
                     .on('click', function(e) { e.preventDefault(); hpNativeToggleLabels('Disabled:Label'); })
@@ -250,7 +248,7 @@ if (file_exists($presetEnginePath)) {
         } else if (disabledLabelCount > 0) {
             $rowWrap.append($('<span>').addClass('hp-native-badge hp-native-badge--disabled').text(disabledLabelCount + ' Paused'));
             $rowWrap.append(
-                $('<a>').attr('href', '#').attr('id', 'hp-native-toggle-btn').addClass('hp-native-toggle-link')
+                $('<a>').attr('href', 'javascript:void(0);').attr('id', 'hp-native-toggle-btn').addClass('hp-native-toggle-link')
                     .attr('title', 'Resume discovery back to active Label type')
                     .html('<i class="fa fa-play-circle"></i> Resume')
                     .on('click', function(e) { e.preventDefault(); hpNativeToggleLabels('Label'); })
@@ -446,13 +444,13 @@ if (file_exists($presetEnginePath)) {
         var activeTotal = Object.keys(labelsMap).length;
         var $badge = $('.hp-native-badge');
         if (activeTotal > 0) {
-            $('#hp-add-labels-link').html('<i class="fa fa-tags"></i> Edit Homepage Labels');
+            $('#hp-add-labels-link').html('<i class="fa fa-fw fa-tags"></i> Edit Homepage Labels');
             if (!$badge.length) {
                 $badge = $('<span>').addClass('hp-native-badge').insertAfter('#hp-add-labels-link');
             }
             $badge.removeClass('hp-native-badge--disabled').addClass('hp-native-badge--active').text(activeTotal + ' Active');
         } else {
-            $('#hp-add-labels-link').html('<i class="fa fa-plus-square"></i> Add Homepage Labels');
+            $('#hp-add-labels-link').html('<i class="fa fa-fw fa-tags"></i> Add Homepage Labels');
             if ($badge.length) {
                 $badge.remove();
             }
