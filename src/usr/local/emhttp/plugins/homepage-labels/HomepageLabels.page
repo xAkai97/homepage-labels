@@ -278,14 +278,14 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         background: rgba(120, 120, 120, 0.1);
         border: 1px solid rgba(120, 120, 120, 0.25);
         border-radius: 20px;
-        padding: 3px 6px;
-        gap: 3px;
+        padding: 3px 8px;
+        gap: 4px;
     }
     .homepage-filter-pill {
         background: transparent;
         border: none;
         outline: none;
-        padding: 4px 11px;
+        padding: 4px 12px;
         border-radius: 16px;
         font-size: 0.88em;
         font-weight: 500;
@@ -297,8 +297,8 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         transition: all 0.15s ease;
     }
     .homepage-filter-pill[data-filter="all"] {
-        padding-left: 15px;
-        padding-right: 12px;
+        padding-left: 20px;
+        padding-right: 14px;
     }
     .homepage-filter-pill:hover {
         background: rgba(120, 120, 120, 0.15);
