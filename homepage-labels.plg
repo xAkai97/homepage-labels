@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name        "homepage-labels">
   <!ENTITY author      "xAkai97">
-  <!ENTITY version     "2026.11.02.1">
+  <!ENTITY version     "2026.11.17">
   <!ENTITY gitURL      "https://raw.githubusercontent.com/xAkai97/homepage-labels/dev">
   <!ENTITY pluginURL   "&gitURL;/homepage-labels.plg">
   <!ENTITY pkgURL      "&gitURL;/archive/&name;-&version;.txz">
@@ -23,7 +23,7 @@
          support="https://github.com/xAkai97/homepage-labels/issues">
 
 <CHANGES>
-###2026.11.02.1
+###2026.11.17
 - Icons: Added automatic discovery of local custom icon directories from Homepage container mounts and thumbnail streaming via get_icon_thumb
 - UI: Restricted the secret reveal toggle button exclusively to sensitive fields (passwords, API keys, tokens, secrets)
 - UI: Removed redundant inline template XML mask toggle checkbox on password/token fields while preserving show/hide password visibility toggle
