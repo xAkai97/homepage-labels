@@ -315,13 +315,14 @@ function renderInteractiveFieldRow($target, $value, $metadata, $isActive, $isReq
     // Disabled attribute for dimmed fields (prevents inclusion in form serialization)
     $disabledAttr = (!$isActive && !$isRequired) ? ' disabled' : '';
 
-    // Determine whether this field is sensitive (passwords, API keys, tokens, secrets, or explicitly masked)
-    $isSensitive = ($fieldType === 'password'
+    // Determine whether this field is intrinsically sensitive (passwords, API keys, tokens, secrets)
+    $isIntrinsicSensitive = ($fieldType === 'password'
         || !empty($metadata['mask'])
-        || (bool)preg_match('/(key|token|secret|password|passwd|pass|auth|apikey)/i', $target)
-        || isMaskTrue($configAttrs['mask'] ?? false));
-
-    $isSecret = $isSensitive;
+        || (bool)preg_match('/(key|token|secret|password|passwd|pass|auth|apikey)/i', $target));
+    $hasExplicitMask = isset($configAttrs['mask']) && $configAttrs['mask'] !== '';
+    $cfgMaskBool = $hasExplicitMask ? isMaskTrue($configAttrs['mask']) : $isIntrinsicSensitive;
+    $isSensitive = ($isIntrinsicSensitive || $cfgMaskBool);
+    $isSecret = $cfgMaskBool;
 
     if ($target === 'homepage.group') {
         // Special combobox for group
@@ -448,7 +449,7 @@ function renderInteractiveFieldRow($target, $value, $metadata, $isActive, $isReq
     $cfgDescVal = htmlspecialchars($configAttrs['description'] ?? ($metadata['help'] ?? 'Homepage Discovery Label'));
     $cfgDisplayVal = strtolower($configAttrs['display'] ?? 'always');
     $cfgReqVal = isMaskTrue($configAttrs['required'] ?? false) ? 'true' : ($isRequired ? 'true' : 'false');
-    $cfgMaskVal = isMaskTrue($configAttrs['mask'] ?? false) ? 'true' : (($mask || $fieldType === 'password') ? 'true' : 'false');
+    $cfgMaskVal = $cfgMaskBool ? 'true' : 'false';
 
     $html .= '<div class="homepage-field-config-drawer" style="display:none;">' . "\n";
     $html .= '<div class="homepage-drawer-header"><i class="fa fa-sliders"></i> Advanced Unraid Template &lt;Config&gt; Attributes</div>' . "\n";

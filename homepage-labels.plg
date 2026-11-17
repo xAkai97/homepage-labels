@@ -24,6 +24,8 @@
 
 <CHANGES>
 ###2026.11.02.1
+- Icons: Added automatic discovery of local custom icon directories from Homepage container mounts and thumbnail streaming via get_icon_thumb
+- UI: Restricted the secret reveal toggle button exclusively to sensitive fields (passwords, API keys, tokens, secrets)
 - UI: Removed redundant inline template XML mask toggle checkbox on password/token fields while preserving show/hide password visibility toggle
 - UI: Preserved per-section Apply buttons in Settings and unified the Done action to a single bottom button
 - UI: Removed unused dashboard card mockup preview from editor and template views

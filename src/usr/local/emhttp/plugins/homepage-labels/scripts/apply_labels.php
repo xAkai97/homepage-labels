@@ -175,32 +175,48 @@ switch ($action) {
         $matchedExt = null;
 
         foreach ($dirs as $dir) {
-            $candidate = rtrim($dir, '/') . '/' . $iconName;
             $realDir = realpath($dir);
+            if (!$realDir) {
+                continue;
+            }
+            $safePrefix = rtrim($realDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+            $candidate = rtrim($dir, '/\\') . DIRECTORY_SEPARATOR . $iconName;
             $realPath = realpath($candidate);
-            if ($realDir && $realPath && file_exists($realPath)) {
-                $safePrefix = rtrim($realDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-                if (strpos($realPath, $safePrefix) === 0) {
-                    if (isset($contentTypes[$ext])) {
-                        $matchedFile = $realPath;
-                        $matchedExt = $ext;
-                        break;
-                    }
-                }
+            if ($realPath && file_exists($realPath) && strpos($realPath, $safePrefix) === 0 && isset($contentTypes[$ext])) {
+                $matchedFile = $realPath;
+                $matchedExt = $ext;
+                break;
             }
 
             // If no extension was specified in the request, probe supported extensions
             if (empty($ext)) {
                 foreach (array_keys($contentTypes) as $probeExt) {
-                    $probeCand = rtrim($dir, '/') . '/' . $iconName . '.' . $probeExt;
+                    $probeCand = rtrim($dir, '/\\') . DIRECTORY_SEPARATOR . $iconName . '.' . $probeExt;
                     $realProbe = realpath($probeCand);
-                    if ($realDir && $realProbe && file_exists($realProbe)) {
-                        $safePrefix = rtrim($realDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-                        if (strpos($realProbe, $safePrefix) === 0) {
-                            $matchedFile = $realProbe;
-                            $matchedExt = $probeExt;
-                            break 2;
-                        }
+                    if ($realProbe && file_exists($realProbe) && strpos($realProbe, $safePrefix) === 0) {
+                        $matchedFile = $realProbe;
+                        $matchedExt = $probeExt;
+                        break 2;
+                    }
+                }
+            }
+
+            // Case-insensitive fallback via getLocalCustomIcons() for Linux hosts
+            foreach (getLocalCustomIcons($dir) as $item) {
+                $itemExt = strtolower($item['ext'] ?? '');
+                if (!isset($contentTypes[$itemExt])) {
+                    continue;
+                }
+                $isMatch = (strcasecmp($item['filename'], $iconName) === 0)
+                    || (empty($ext) && strcasecmp($item['name'], $iconName) === 0);
+                if ($isMatch) {
+                    $itemCand = rtrim($dir, '/\\') . DIRECTORY_SEPARATOR . basename($item['filename']);
+                    $realItem = realpath($itemCand);
+                    if ($realItem && file_exists($realItem) && strpos($realItem, $safePrefix) === 0) {
+                        $matchedFile = $realItem;
+                        $matchedExt = $itemExt;
+                        break 2;
                     }
                 }
             }
@@ -217,16 +233,33 @@ switch ($action) {
             exit;
         }
 
-        // Fallback: Check if container template has an <Icon> URL
+        // Fallback: Check if container template has an <Icon> URL (case-insensitive)
         $baseName = pathinfo($iconName, PATHINFO_FILENAME);
-        $templateCandidates = [$baseName, 'my-' . $baseName, 'binhex-' . $baseName, 'linuxserver-' . $baseName];
-        foreach ($templateCandidates as $tCand) {
-            $tRes = readTemplate($tCand);
-            if (!empty($tRes['success']) && !empty($tRes['doc'])) {
-                $meta = getContainerMeta($tRes['doc']);
-                if (!empty($meta['Icon']) && filter_var($meta['Icon'], FILTER_VALIDATE_URL)) {
-                    header('Location: ' . $meta['Icon']);
-                    exit;
+        if (!empty($baseName)) {
+            $wantTargets = [
+                strtolower($baseName),
+                strtolower('binhex-' . $baseName),
+                strtolower('linuxserver-' . $baseName),
+            ];
+            $matchedTemplateNames = [];
+            foreach (listAllTemplates() as $t) {
+                $tName = is_array($t) ? ($t['name'] ?? '') : $t;
+                if ($tName === '') {
+                    continue;
+                }
+                if (in_array(strtolower($tName), $wantTargets, true)) {
+                    $matchedTemplateNames[] = $tName;
+                }
+            }
+            foreach ($matchedTemplateNames as $tCand) {
+                $tRes = readTemplate($tCand);
+                if (!empty($tRes['success']) && !empty($tRes['doc'])) {
+                    $meta = getContainerMeta($tRes['doc']);
+                    $iconUrl = trim(str_replace(["\r", "\n"], '', $meta['Icon'] ?? ''));
+                    if ($iconUrl !== '' && preg_match('#^https?://#i', $iconUrl) && filter_var($iconUrl, FILTER_VALIDATE_URL)) {
+                        header('Location: ' . $iconUrl);
+                        exit;
+                    }
                 }
             }
         }

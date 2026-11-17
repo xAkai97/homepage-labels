@@ -232,6 +232,24 @@ test('Secret fields render single reveal toggle without redundant inline mask ch
     );
     assertFalse(strpos($iconHtml, 'homepage-btn--secret-toggle') !== false, 'Non-sensitive field (Homepage Icon) does not render secret toggle button');
 
+    // Verify sensitive field with explicit Mask="false" respects unmasked config while keeping secret toggle hidden
+    $explicitUnmaskedHtml = renderInteractiveFieldRow(
+        'homepage.widget.key',
+        'unmasked-api-key',
+        ['label' => 'API Key', 'type' => 'password', 'mask' => true],
+        true,
+        false,
+        null,
+        'widget',
+        [],
+        [],
+        '',
+        ['mask' => 'false']
+    );
+    assertTrue(strpos($explicitUnmaskedHtml, '<input type="text"') !== false, 'Sensitive field with explicit Mask=false renders as text input');
+    assertTrue(strpos($explicitUnmaskedHtml, '<option value="false" selected>No</option>') !== false, 'Config drawer Password Mask selects No when explicitly set to false');
+    assertTrue(strpos($explicitUnmaskedHtml, 'homepage-btn--secret-toggle" title="Show secret" onclick="homepageToggleSecretVisibility(this)" style="display:none;"') !== false, 'Sensitive field with explicit Mask=false keeps secret toggle button hidden');
+
     $defaults = getDefaultPluginSettings();
     $presets = loadAllPresets();
     $formHtml = renderEditorForm('Sonarr', [

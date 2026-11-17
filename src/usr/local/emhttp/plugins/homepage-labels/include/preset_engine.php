@@ -292,6 +292,7 @@ function matchPreset($repository, $presets = null) {
  * @return array List of valid existing host directory paths
  */
 function getIconCandidateDirectories($settings = []) {
+    static $autoDirsCache = [];
     $dirs = [];
 
     // 1. Explicitly configured directory
@@ -299,67 +300,80 @@ function getIconCandidateDirectories($settings = []) {
         $dirs[] = rtrim($settings['CUSTOM_ICONS_HOST_DIR'], '/');
     }
 
-    // Ensure validator.php is loaded for findHomepageContainer()
-    if (!function_exists('findHomepageContainer')) {
-        $validatorScript = defined('VALIDATOR_SCRIPT_PATH') ? VALIDATOR_SCRIPT_PATH : '/usr/local/emhttp/plugins/homepage-labels/scripts/validator.php';
-        if (file_exists($validatorScript)) {
-            require_once $validatorScript;
+    $hpContainerKey = $settings['HOMEPAGE_CONTAINER_NAME'] ?? 'homepage';
+    $cacheKey = $hpContainerKey . '|' . (defined('TEMPLATES_PATH') ? TEMPLATES_PATH : '');
+
+    if (!isset($autoDirsCache[$cacheKey])) {
+        $discovered = [];
+
+        // Ensure validator.php is loaded for findHomepageContainer()
+        if (!function_exists('findHomepageContainer')) {
+            $validatorScript = defined('VALIDATOR_SCRIPT_PATH')
+                ? VALIDATOR_SCRIPT_PATH
+                : (file_exists(__DIR__ . '/../scripts/validator.php')
+                    ? __DIR__ . '/../scripts/validator.php'
+                    : '/usr/local/emhttp/plugins/homepage-labels/scripts/validator.php');
+            if (file_exists($validatorScript)) {
+                require_once $validatorScript;
+            }
         }
-    }
 
-    // 2. Discover from Homepage container template
-    if (function_exists('findHomepageContainer') && function_exists('readTemplate')) {
-        $hpName = findHomepageContainer($settings['HOMEPAGE_CONTAINER_NAME'] ?? 'homepage');
-        if (!empty($hpName)) {
-            $tRes = readTemplate($hpName);
-            if (!empty($tRes['success']) && !empty($tRes['doc'])) {
-                $configs = $tRes['doc']->getElementsByTagName('Config');
-                for ($i = 0; $i < $configs->length; $i++) {
-                    $cfg = $configs->item($i);
-                    if (strtolower($cfg->getAttribute('Type')) !== 'path') continue;
-                    $target = strtolower(trim($cfg->getAttribute('Target')));
-                    $name = strtolower(trim($cfg->getAttribute('Name')));
-                    $hostPath = trim($cfg->nodeValue);
-                    if (empty($hostPath)) continue;
+        // 2. Discover from Homepage container template
+        if (function_exists('findHomepageContainer') && function_exists('readTemplate')) {
+            $hpName = findHomepageContainer($hpContainerKey);
+            if (!empty($hpName)) {
+                $tRes = readTemplate($hpName);
+                if (!empty($tRes['success']) && !empty($tRes['doc'])) {
+                    $configs = $tRes['doc']->getElementsByTagName('Config');
+                    for ($i = 0; $i < $configs->length; $i++) {
+                        $cfg = $configs->item($i);
+                        if (strtolower($cfg->getAttribute('Type')) !== 'path') continue;
+                        $target = strtolower(trim($cfg->getAttribute('Target')));
+                        $name = strtolower(trim($cfg->getAttribute('Name')));
+                        $hostPath = trim($cfg->nodeValue);
+                        if (empty($hostPath)) continue;
 
-                    // Direct icons or images mount
-                    if (strpos($target, '/icons') !== false || strpos($target, '/images') !== false ||
-                        strpos($name, 'icon') !== false || strpos($name, 'image') !== false) {
-                        if (is_dir($hostPath)) {
-                            $dirs[] = rtrim($hostPath, '/');
+                        // Direct icons or images mount
+                        if (strpos($target, '/icons') !== false || strpos($target, '/images') !== false ||
+                            strpos($name, 'icon') !== false || strpos($name, 'image') !== false) {
+                            if (is_dir($hostPath)) {
+                                $discovered[] = rtrim($hostPath, '/');
+                            }
                         }
-                    }
 
-                    // Config mount containing icons/ or images/
-                    if ($target === '/app/config' || $target === '/config') {
-                        foreach (['/icons', '/images', '/public/icons', '/public/images'] as $sub) {
-                            if (is_dir($hostPath . $sub)) {
-                                $dirs[] = rtrim($hostPath . $sub, '/');
+                        // Config mount containing icons/ or images/
+                        if ($target === '/app/config' || $target === '/config') {
+                            foreach (['/icons', '/images', '/public/icons', '/public/images'] as $sub) {
+                                if (is_dir($hostPath . $sub)) {
+                                    $discovered[] = rtrim($hostPath . $sub, '/');
+                                }
                             }
                         }
                     }
                 }
             }
         }
-    }
 
-    // 3. Standard Unraid locations
-    $standardPaths = [
-        '/mnt/user/metadata/icons',
-        '/mnt/user/metadata/images',
-        '/mnt/user/appdata/homepage/icons',
-        '/mnt/user/appdata/homepage/images',
-        '/mnt/user/appdata/homepage/config/icons',
-        '/mnt/user/appdata/homepage/config/images',
-        '/boot/config/plugins/homepage-labels/icons',
-    ];
-    foreach ($standardPaths as $p) {
-        if (is_dir($p)) {
-            $dirs[] = $p;
+        // 3. Standard Unraid locations
+        $standardPaths = [
+            '/mnt/user/metadata/icons',
+            '/mnt/user/metadata/images',
+            '/mnt/user/appdata/homepage/icons',
+            '/mnt/user/appdata/homepage/images',
+            '/mnt/user/appdata/homepage/config/icons',
+            '/mnt/user/appdata/homepage/config/images',
+            '/boot/config/plugins/homepage-labels/icons',
+        ];
+        foreach ($standardPaths as $p) {
+            if (is_dir($p)) {
+                $discovered[] = $p;
+            }
         }
+
+        $autoDirsCache[$cacheKey] = $discovered;
     }
 
-    return array_values(array_unique($dirs));
+    return array_values(array_unique(array_merge($dirs, $autoDirsCache[$cacheKey])));
 }
 
 /**
