@@ -55,6 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         ?? null;
     $providedToken = $_POST['csrf_token'] ?? '';
     if (empty($sessionToken) || empty($providedToken) || !hash_equals((string)$sessionToken, (string)$providedToken)) {
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
         http_response_code(403);
         echo 'Invalid CSRF token.';
         exit;
@@ -404,7 +407,7 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
 <dl>
     <dt>Support &amp; Backup Bundle:</dt>
     <dd>
-        <input type="button" id="btn-download-support-bundle" value="Download Support &amp; Backup Bundle" onclick="document.getElementById('form-support-bundle').submit()">
+        <input type="button" id="btn-download-support-bundle" value="Download Support &amp; Backup Bundle" onclick="homepageDownloadSupportBundle()">
         <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Exports an anonymized diagnostic bundle containing your plugin settings, template discovery metadata, and custom presets for troubleshooting.</span>
     </dd>
 </dl>
@@ -426,26 +429,49 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
 </div><!-- /.homepage-root -->
 
 <script>
+var csrf_token = "<?= htmlspecialchars($var['csrf_token'] ?? $_SESSION['csrf_token'] ?? '') ?>";
+
 function homepagePreviewScale(scale) {
     $('.homepage-root')
         .removeClass('homepage-scale-100 homepage-scale-110 homepage-scale-125 homepage-scale-140')
         .addClass('homepage-scale-' + scale);
 }
 
-$(function() {
-    function homepageResolveCsrfToken() {
-        var existing = $('#settings-csrf-token').val();
-        if (existing) return existing;
-        if (typeof csrf_token !== 'undefined' && csrf_token) return csrf_token;
-        if (window.csrf_token) return window.csrf_token;
-        if (typeof $.cookie === 'function') {
-            var c = $.cookie('csrf_token');
-            if (c) return c;
-        }
-        var m = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
-        return m ? decodeURIComponent(m[1]) : '';
+function homepageResolveCsrfToken() {
+    var existing = $('#settings-csrf-token').val();
+    if (existing) return existing;
+    if (typeof csrf_token !== 'undefined' && csrf_token) return csrf_token;
+    if (window.csrf_token) return window.csrf_token;
+    if (typeof $.cookie === 'function') {
+        var c = $.cookie('csrf_token');
+        if (c) return c;
     }
+    var m = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+    return m ? decodeURIComponent(m[1]) : '';
+}
 
+function homepageDownloadSupportBundle() {
+    var token = homepageResolveCsrfToken();
+    var $form = $('#form-support-bundle');
+    if ($form.length && token) {
+        $form.find('input[name="csrf_token"]').val(token);
+    }
+    // Direct stream via apply_labels.php without leaving or reloading the page
+    var url = '/plugins/homepage-labels/scripts/apply_labels.php?action=download_support_bundle&download=1';
+    if (token) {
+        url += '&csrf_token=' + encodeURIComponent(token);
+    }
+    var a = document.createElement('a');
+    a.href = url;
+    a.setAttribute('download', '');
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+        if (a && a.parentNode) a.parentNode.removeChild(a);
+    }, 200);
+}
+
+$(function() {
     var token = homepageResolveCsrfToken();
     if (token) {
         if (!$('#settings-csrf-token').val()) {

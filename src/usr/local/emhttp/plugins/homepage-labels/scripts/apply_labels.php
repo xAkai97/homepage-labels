@@ -112,7 +112,7 @@ if (empty($var['csrf_token'])) {
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
 
 // Validate CSRF token for state-modifying actions if running in authenticated Unraid context
-$modifyingActions = ['save', 'disable', 'restore', 'template_clone', 'template_save', 'template_rename', 'template_delete', 'template_apply', 'save_scale', 'batch_enable', 'batch_disable', 'batch_apply_template', 'recreate_single', 'export_templates', 'import_templates', 'test_connection', 'batch_set_group', 'export_services_yaml', 'sync_services_yaml'];
+$modifyingActions = ['save', 'disable', 'restore', 'template_clone', 'template_save', 'template_rename', 'template_delete', 'template_apply', 'save_scale', 'batch_enable', 'batch_disable', 'batch_apply_template', 'recreate_single', 'export_templates', 'import_templates', 'test_connection', 'batch_set_group', 'export_services_yaml', 'sync_services_yaml', 'download_support_bundle'];
 if (in_array($action, $modifyingActions, true)) {
     $sessionToken = $var['csrf_token']
         ?? $GLOBALS['var']['csrf_token']
@@ -1120,6 +1120,48 @@ switch ($action) {
             'message' => "Updated group to '{$groupName}' for {$successCount} container(s)." . ($failCount > 0 ? " ({$failCount} failed)" : '')
         ]);
         break;
+
+    // -------------------------------------------------------
+    // DOWNLOAD_SUPPORT_BUNDLE: Export diagnostic JSON bundle
+    // -------------------------------------------------------
+    case 'download_support_bundle':
+        $bundleData = [
+            'generated_at'   => date('Y-m-d H:i:s'),
+            'plugin_version' => '2026.11.17',
+            'php_version'    => PHP_VERSION,
+            'os'             => PHP_OS,
+            'settings'       => $settings,
+            'user_templates' => loadUserTemplates(),
+            'templates_meta' => [],
+        ];
+
+        $allTemplates = listAllTemplates();
+        foreach ($allTemplates as $t) {
+            $tName = is_array($t) ? ($t['name'] ?? '') : $t;
+            if (empty($tName)) continue;
+            $readRes = readTemplate($tName);
+            if ($readRes['success']) {
+                $meta = getContainerMeta($readRes['doc']);
+                $labels = getHomepageLabels($readRes['doc']);
+                foreach ($labels as $tgt => &$lData) {
+                    if (isMaskTrue($lData['mask'] ?? false) || strpos($tgt, 'key') !== false || strpos($tgt, 'password') !== false || strpos($tgt, 'token') !== false) {
+                        $lData['value'] = '***REDACTED***';
+                    }
+                }
+                $bundleData['templates_meta'][$tName] = [
+                    'meta'   => $meta,
+                    'labels' => $labels,
+                ];
+            }
+        }
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        header('Content-Type: application/json; charset=utf-8');
+        header('Content-Disposition: attachment; filename="homepage-labels-support-bundle-' . date('Ymd-His') . '.json"');
+        echo json_encode($bundleData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        exit;
 
     // -------------------------------------------------------
     // EXPORT_SERVICES_YAML: Compile and download services.yaml
