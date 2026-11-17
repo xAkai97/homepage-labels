@@ -11,7 +11,7 @@ Instead of manually editing Docker template XML files or remembering Homepage la
 ### Visual Label Editor
 - **Application Presets**: Automatic detection and 1-click presets for over 30 popular self-hosted apps (Sonarr, Radarr, Plex, Jellyfin, qBittorrent, etc.).
 - **Live Preview**: Real-time visual Homepage service card preview, services.yaml translation, and Docker CLI label generation.
-- **Application Icons & Presets**: Pre-configured icons for 30+ services with 1-click presets, multi-source live preview support (Dashboard Icons, Simple Icons, Selfh.st, and Material Design), and a direct link to the official Homepage icon reference guide.
+- **Application Icons & Presets**: Pre-configured icons for 30+ services with 1-click presets, multi-source live preview support (Dashboard Icons, Simple Icons, Selfh.st, Material Design, and auto-discovered local custom icons from Homepage mounts), and a direct link to the official Homepage icon reference guide.
 - **Secret Masking**: Sensitive fields (API keys, passwords, tokens) are automatically detected, masked in the WebGUI, and synced with Unraid XML `Mask="true"` attributes.
 - **URL Quick-Fill**: One-click shortcuts to populate Host, Container (for custom Docker networks), and WebUI URLs.
 - **Field Catalog**: Full support for all standard Homepage fields, site monitor configurations, and application widgets.
@@ -76,7 +76,7 @@ For technical details, configuration formats, and development guides, refer to t
 
 - [**Presets and Custom Templates**](docs/TEMPLATES.md): Shipped application presets, custom template JSON schema, import conflict handling, and custom preset overrides.
 - [**Architecture and File Structure**](docs/ARCHITECTURE.md): Directory layout, XML differential engine, hook mechanisms, and container execution model.
-- [**Development and Testing**](docs/DEVELOPMENT.md): Line ending requirements (LF), running the 74-test standalone test suite, keyword filters, and coding invariants.
+- [**Development and Testing**](docs/DEVELOPMENT.md): Line ending requirements (LF), running the 78-test standalone test suite, keyword filters, and coding invariants.
 
 ---
 

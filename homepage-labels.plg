@@ -31,6 +31,7 @@
 - UI: Removed unused dashboard card mockup preview from editor and template views
 - UI: Standardized 2.25em button and input heights, full input borders, symmetric segmented quick-filter pills, and accent group headers
 - UI: Introduced theme-aware CSS custom properties (--hp-bg-surface, --hp-bg-elevated, --hp-border, --hp-text-muted) with dark mode parity
+- Fix: Direct stream support bundle download via backend API and guard against unparsed .page frontmatter leakage on CSRF failure
 
 ###2026.11.02
 - Fix: Resolved CSRF token across globals, var.ini, and cookies in settings form (1be5581)

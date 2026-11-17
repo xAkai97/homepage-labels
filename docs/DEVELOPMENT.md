@@ -23,7 +23,7 @@ If editing on Windows, ensure your editor is configured to use LF line endings.
 
 ## Test Suite
 
-The plugin includes a zero-dependency standalone PHP sandbox test suite covering XML parsing, preset resolution, URL generation, security boundaries, and template serialization.
+The plugin includes a zero-dependency standalone PHP sandbox test suite (78 tests across 6 modular suites) covering XML parsing, preset resolution, URL generation, security boundaries, and template serialization.
 
 Tests execute inside isolated temporary directories without modifying host templates or live Docker services.
 
