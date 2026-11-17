@@ -13,6 +13,7 @@ header('Content-Type: application/json');
 require_once '/usr/local/emhttp/plugins/homepage-labels/include/xml_parser.php';
 require_once '/usr/local/emhttp/plugins/homepage-labels/include/preset_engine.php';
 require_once '/usr/local/emhttp/plugins/homepage-labels/include/view_components.php';
+require_once '/usr/local/emhttp/plugins/homepage-labels/scripts/validator.php';
 
 /**
  * Collect and normalize Homepage labels from form POST data.
@@ -133,7 +134,7 @@ switch ($action) {
     // GET_LOCAL_ICONS: Get list of icons from custom folder
     // -------------------------------------------------------
     case 'get_local_icons':
-        $hostDir = !empty($settings['CUSTOM_ICONS_HOST_DIR']) ? $settings['CUSTOM_ICONS_HOST_DIR'] : '';
+        $hostDir = !empty($settings['CUSTOM_ICONS_HOST_DIR']) ? $settings['CUSTOM_ICONS_HOST_DIR'] : resolveCustomIconsHostDir($settings);
         $urlPrefix = !empty($settings['CUSTOM_ICONS_URL_PREFIX']) ? $settings['CUSTOM_ICONS_URL_PREFIX'] : '/icons/';
         $icons = getLocalCustomIcons($hostDir, $urlPrefix);
         echo json_encode([
@@ -150,18 +151,14 @@ switch ($action) {
     // GET_ICON_THUMB: Safely stream icon thumbnail image
     // -------------------------------------------------------
     case 'get_icon_thumb':
-        $hostDir = !empty($settings['CUSTOM_ICONS_HOST_DIR']) ? $settings['CUSTOM_ICONS_HOST_DIR'] : '';
         $iconName = isset($_GET['name']) ? trim($_GET['name']) : '';
-
-        if (empty($hostDir) || !is_dir($hostDir) || empty($iconName)) {
+        if (empty($iconName)) {
             http_response_code(404);
             exit;
         }
 
         // Sanitize icon name and extract basename
         $iconName = basename($iconName);
-        $filePath = rtrim($hostDir, '/') . '/' . $iconName;
-
         $ext = strtolower(pathinfo($iconName, PATHINFO_EXTENSION));
         $contentTypes = [
             'png'  => 'image/png',
@@ -171,32 +168,70 @@ switch ($action) {
             'jpeg' => 'image/jpeg',
             'ico'  => 'image/x-icon',
         ];
-        if (!isset($contentTypes[$ext])) {
-            http_response_code(404);
+
+        // Gather candidate directories (configured + Homepage container mounts + standard Unraid locations)
+        $dirs = getIconCandidateDirectories($settings);
+        $matchedFile = null;
+        $matchedExt = null;
+
+        foreach ($dirs as $dir) {
+            $candidate = rtrim($dir, '/') . '/' . $iconName;
+            $realDir = realpath($dir);
+            $realPath = realpath($candidate);
+            if ($realDir && $realPath && file_exists($realPath)) {
+                $safePrefix = rtrim($realDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+                if (strpos($realPath, $safePrefix) === 0) {
+                    if (isset($contentTypes[$ext])) {
+                        $matchedFile = $realPath;
+                        $matchedExt = $ext;
+                        break;
+                    }
+                }
+            }
+
+            // If no extension was specified in the request, probe supported extensions
+            if (empty($ext)) {
+                foreach (array_keys($contentTypes) as $probeExt) {
+                    $probeCand = rtrim($dir, '/') . '/' . $iconName . '.' . $probeExt;
+                    $realProbe = realpath($probeCand);
+                    if ($realDir && $realProbe && file_exists($realProbe)) {
+                        $safePrefix = rtrim($realDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+                        if (strpos($realProbe, $safePrefix) === 0) {
+                            $matchedFile = $realProbe;
+                            $matchedExt = $probeExt;
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($matchedFile && $matchedExt && isset($contentTypes[$matchedExt])) {
+            header('Content-Type: ' . $contentTypes[$matchedExt]);
+            header('Cache-Control: public, max-age=86400');
+            if ($matchedExt === 'svg') {
+                header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'");
+                header('X-Content-Type-Options: nosniff');
+            }
+            readfile($matchedFile);
             exit;
         }
 
-        // Prevent path traversal and enforce directory boundary
-        $realHostDir = realpath($hostDir);
-        $realFilePath = realpath($filePath);
-        if (!$realHostDir || !$realFilePath || !file_exists($realFilePath)) {
-            http_response_code(404);
-            exit;
+        // Fallback: Check if container template has an <Icon> URL
+        $baseName = pathinfo($iconName, PATHINFO_FILENAME);
+        $templateCandidates = [$baseName, 'my-' . $baseName, 'binhex-' . $baseName, 'linuxserver-' . $baseName];
+        foreach ($templateCandidates as $tCand) {
+            $tRes = readTemplate($tCand);
+            if (!empty($tRes['success']) && !empty($tRes['doc'])) {
+                $meta = getContainerMeta($tRes['doc']);
+                if (!empty($meta['Icon']) && filter_var($meta['Icon'], FILTER_VALIDATE_URL)) {
+                    header('Location: ' . $meta['Icon']);
+                    exit;
+                }
+            }
         }
 
-        $safePrefix = rtrim($realHostDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        if (strpos($realFilePath, $safePrefix) !== 0) {
-            http_response_code(404);
-            exit;
-        }
-
-        header('Content-Type: ' . $contentTypes[$ext]);
-        header('Cache-Control: public, max-age=86400');
-        if ($ext === 'svg') {
-            header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'");
-            header('X-Content-Type-Options: nosniff');
-        }
-        readfile($realFilePath);
+        http_response_code(404);
         exit;
 
     // -------------------------------------------------------

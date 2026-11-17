@@ -280,13 +280,110 @@ function matchPreset($repository, $presets = null) {
 }
 
 /**
+ * Discover candidate directories for custom/local icons on the Unraid host.
+ *
+ * Checks in order:
+ * 1. User-configured CUSTOM_ICONS_HOST_DIR (if set and exists)
+ * 2. Volume mounts in the Homepage container template (e.g. /app/public/icons, /icons, /images)
+ * 3. Config directory subfolders in Homepage container template (e.g. config/icons, config/images)
+ * 4. Standard Unraid icon storage locations (/mnt/user/metadata/icons, /mnt/user/appdata/homepage/icons, etc.)
+ *
+ * @param array $settings Plugin settings
+ * @return array List of valid existing host directory paths
+ */
+function getIconCandidateDirectories($settings = []) {
+    $dirs = [];
+
+    // 1. Explicitly configured directory
+    if (!empty($settings['CUSTOM_ICONS_HOST_DIR']) && is_dir($settings['CUSTOM_ICONS_HOST_DIR'])) {
+        $dirs[] = rtrim($settings['CUSTOM_ICONS_HOST_DIR'], '/');
+    }
+
+    // Ensure validator.php is loaded for findHomepageContainer()
+    if (!function_exists('findHomepageContainer')) {
+        $validatorScript = defined('VALIDATOR_SCRIPT_PATH') ? VALIDATOR_SCRIPT_PATH : '/usr/local/emhttp/plugins/homepage-labels/scripts/validator.php';
+        if (file_exists($validatorScript)) {
+            require_once $validatorScript;
+        }
+    }
+
+    // 2. Discover from Homepage container template
+    if (function_exists('findHomepageContainer') && function_exists('readTemplate')) {
+        $hpName = findHomepageContainer($settings['HOMEPAGE_CONTAINER_NAME'] ?? 'homepage');
+        if (!empty($hpName)) {
+            $tRes = readTemplate($hpName);
+            if (!empty($tRes['success']) && !empty($tRes['doc'])) {
+                $configs = $tRes['doc']->getElementsByTagName('Config');
+                for ($i = 0; $i < $configs->length; $i++) {
+                    $cfg = $configs->item($i);
+                    if (strtolower($cfg->getAttribute('Type')) !== 'path') continue;
+                    $target = strtolower(trim($cfg->getAttribute('Target')));
+                    $name = strtolower(trim($cfg->getAttribute('Name')));
+                    $hostPath = trim($cfg->nodeValue);
+                    if (empty($hostPath)) continue;
+
+                    // Direct icons or images mount
+                    if (strpos($target, '/icons') !== false || strpos($target, '/images') !== false ||
+                        strpos($name, 'icon') !== false || strpos($name, 'image') !== false) {
+                        if (is_dir($hostPath)) {
+                            $dirs[] = rtrim($hostPath, '/');
+                        }
+                    }
+
+                    // Config mount containing icons/ or images/
+                    if ($target === '/app/config' || $target === '/config') {
+                        foreach (['/icons', '/images', '/public/icons', '/public/images'] as $sub) {
+                            if (is_dir($hostPath . $sub)) {
+                                $dirs[] = rtrim($hostPath . $sub, '/');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 3. Standard Unraid locations
+    $standardPaths = [
+        '/mnt/user/metadata/icons',
+        '/mnt/user/metadata/images',
+        '/mnt/user/appdata/homepage/icons',
+        '/mnt/user/appdata/homepage/images',
+        '/mnt/user/appdata/homepage/config/icons',
+        '/mnt/user/appdata/homepage/config/images',
+        '/boot/config/plugins/homepage-labels/icons',
+    ];
+    foreach ($standardPaths as $p) {
+        if (is_dir($p)) {
+            $dirs[] = $p;
+        }
+    }
+
+    return array_values(array_unique($dirs));
+}
+
+/**
+ * Resolve the primary host directory for custom local icons.
+ *
+ * @param array $settings Plugin settings
+ * @return string Directory path or empty string
+ */
+function resolveCustomIconsHostDir($settings = []) {
+    $dirs = getIconCandidateDirectories($settings);
+    return !empty($dirs) ? $dirs[0] : '';
+}
+
+/**
  * Scan a host directory for custom icon/image files.
  *
  * @param string $hostDir Host path (e.g., "/mnt/user/metadata/icons")
  * @param string $urlPrefix URL prefix inside container (e.g., "/icons/" or "/images/")
  * @return array List of icon items [ ['filename' => 'healarr.png', 'url_path' => '/icons/healarr.png', 'name' => 'healarr', 'ext' => 'png'], ... ]
  */
-function getLocalCustomIcons($hostDir, $urlPrefix = '/icons/', $forceReload = false) {
+function getLocalCustomIcons($hostDir = null, $urlPrefix = '/icons/', $forceReload = false) {
+    if (empty($hostDir)) {
+        $hostDir = resolveCustomIconsHostDir();
+    }
     static $cache = [];
     $cacheKey = $hostDir . '|' . $urlPrefix;
     if (!$forceReload && isset($cache[$cacheKey])) {
@@ -401,8 +498,8 @@ function resolveIcon($existingLabels, $preset, $containerMeta, $containerName = 
         return $existingLabels['homepage.icon']['value'];
     }
 
-    // Step 2: Check custom local icons folder if configured
-    $hostDir = !empty($settings['CUSTOM_ICONS_HOST_DIR']) ? $settings['CUSTOM_ICONS_HOST_DIR'] : '';
+    // Step 2: Check custom local icons folder if configured or auto-detected
+    $hostDir = !empty($settings['CUSTOM_ICONS_HOST_DIR']) ? $settings['CUSTOM_ICONS_HOST_DIR'] : resolveCustomIconsHostDir($settings);
     $urlPrefix = !empty($settings['CUSTOM_ICONS_URL_PREFIX']) ? $settings['CUSTOM_ICONS_URL_PREFIX'] : '/icons/';
     if (!empty($hostDir) && is_dir($hostDir) && !empty($containerName)) {
         $localMatch = matchLocalCustomIcon($containerName, $hostDir, $urlPrefix);

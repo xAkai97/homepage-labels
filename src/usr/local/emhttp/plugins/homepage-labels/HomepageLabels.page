@@ -4875,6 +4875,12 @@ function homepageUpdateIconPreview(value) {
     }
 
     img.onerror = function() {
+        if (!this.dataset.triedLocal && value.indexOf('/') !== 0 && !value.match(/^https?:\/\//)) {
+            this.dataset.triedLocal = '1';
+            var fname = value.split('/').pop();
+            this.src = '/plugins/homepage-labels/scripts/apply_labels.php?action=get_icon_thumb&name=' + encodeURIComponent(fname);
+            return;
+        }
         $(this).remove();
         if ($preview.is(':empty')) {
             $preview.append($('<span class="homepage-icon-name" style="font-size:0.85em;opacity:0.8;">').text(value));

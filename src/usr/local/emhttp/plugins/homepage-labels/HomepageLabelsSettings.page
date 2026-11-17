@@ -314,7 +314,11 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
 <dl>
     <dt><label for="CUSTOM_ICONS_HOST_DIR">Custom Icons Host Directory:</label></dt>
     <dd>
-        <input type="text" id="CUSTOM_ICONS_HOST_DIR" name="CUSTOM_ICONS_HOST_DIR" value="<?= htmlspecialchars($settings['CUSTOM_ICONS_HOST_DIR'] ?? '') ?>" placeholder="/mnt/user/metadata/icons">
+        <?php
+        $autoDir = resolveCustomIconsHostDir($settings);
+        $placeholderDir = !empty($autoDir) ? $autoDir : '/mnt/user/metadata/icons';
+        ?>
+        <input type="text" id="CUSTOM_ICONS_HOST_DIR" name="CUSTOM_ICONS_HOST_DIR" value="<?= htmlspecialchars($settings['CUSTOM_ICONS_HOST_DIR'] ?? '') ?>" placeholder="<?= htmlspecialchars($placeholderDir) ?>">
         <?php
         $iconDir = $settings['CUSTOM_ICONS_HOST_DIR'] ?? '';
         if (!empty($iconDir)) {
@@ -324,9 +328,12 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
             } else {
                 echo '<span class="red-text" style="display:block;margin-top:4px;font-size:0.85em;font-weight:600;"><i class="fa fa-exclamation-triangle"></i> Directory does not exist or is inaccessible</span>';
             }
+        } elseif (!empty($autoDir) && is_dir($autoDir)) {
+            $iconCount = count(glob(rtrim($autoDir, '/') . '/*.{png,svg,webp,jpg,jpeg,ico,PNG,SVG,WEBP,JPG,JPEG,ICO}', GLOB_BRACE) ?: []);
+            echo '<span class="green-text" style="display:block;margin-top:4px;font-size:0.85em;font-weight:600;"><i class="fa fa-magic"></i> Auto-detected from Homepage: <code>' . htmlspecialchars($autoDir) . '</code> (' . $iconCount . ' icon file(s) found)</span>';
         }
         ?>
-        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Host path where your custom icons/images are stored (e.g., <code>/mnt/user/metadata/icons</code> or <code>/mnt/user/metadata/images</code>).</span>
+        <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Host path where your custom icons/images are stored. Leave blank to automatically discover from your Homepage container mounts (e.g., <code>/mnt/user/metadata/icons</code>).</span>
     </dd>
 
     <dt><label for="CUSTOM_ICONS_URL_PREFIX">Homepage Container Icon Prefix:</label></dt>

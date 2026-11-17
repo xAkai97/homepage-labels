@@ -324,3 +324,21 @@ test('batch_set_group writes updated group across fixture templates', function()
     copy($fixturesSrc . DIRECTORY_SEPARATOR . 'my-sonarr.xml', $templatesDir . DIRECTORY_SEPARATOR . 'my-sonarr.xml');
     return true;
 });
+
+test('getIconCandidateDirectories() and resolveCustomIconsHostDir() discovery', function() use ($sandboxDir) {
+    $mockIconDir = $sandboxDir . DIRECTORY_SEPARATOR . 'custom_icons';
+    if (!is_dir($mockIconDir)) {
+        mkdir($mockIconDir, 0777, true);
+    }
+    file_put_contents($mockIconDir . DIRECTORY_SEPARATOR . 'urbackup.png', 'fake_png_data');
+
+    $dirs = getIconCandidateDirectories(['CUSTOM_ICONS_HOST_DIR' => $mockIconDir]);
+    assertTrue(in_array($mockIconDir, $dirs), 'Configured icon directory discovered');
+
+    $resolved = resolveCustomIconsHostDir(['CUSTOM_ICONS_HOST_DIR' => $mockIconDir]);
+    assertEqual($resolved, $mockIconDir, 'resolveCustomIconsHostDir returns configured directory');
+
+    $matched = matchLocalCustomIcon('binhex-urbackup', $mockIconDir, '/icons/');
+    assertEqual($matched, '/icons/urbackup.png', 'matchLocalCustomIcon matches container to local icon file');
+    return true;
+});

@@ -82,8 +82,10 @@ function renderDashboardTable($containers) {
         $iconPreview = '<span class="homepage-muted">—</span>';
         if (!empty($icon)) {
             $iconSrc = '';
-            if (filter_var($icon, FILTER_VALIDATE_URL) || str_starts_with($icon, '/')) {
+            if (filter_var($icon, FILTER_VALIDATE_URL)) {
                 $iconSrc = $icon;
+            } elseif (str_starts_with($icon, '/')) {
+                $iconSrc = '/plugins/homepage-labels/scripts/apply_labels.php?action=get_icon_thumb&name=' . urlencode(basename($icon));
             } elseif (str_starts_with($icon, 'si-')) {
                 $iconSrc = 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/' . substr($icon, 3) . '.svg';
             } elseif (str_starts_with($icon, 'sh-')) {
@@ -620,7 +622,7 @@ function renderEditorForm($containerName, $labels, $preset, $presetList, $groupS
     $quickFillUrls = getQuickFillUrls($containerName, $containerMeta, $settings, $preset['default_port'] ?? 0);
 
     // Custom local icons discovery
-    $hostDir = !empty($settings['CUSTOM_ICONS_HOST_DIR']) ? $settings['CUSTOM_ICONS_HOST_DIR'] : '';
+    $hostDir = !empty($settings['CUSTOM_ICONS_HOST_DIR']) ? $settings['CUSTOM_ICONS_HOST_DIR'] : resolveCustomIconsHostDir($settings);
     $urlPrefix = !empty($settings['CUSTOM_ICONS_URL_PREFIX']) ? $settings['CUSTOM_ICONS_URL_PREFIX'] : '/icons/';
     $localCustomIcons = getLocalCustomIcons($hostDir, $urlPrefix);
     $localIconMatch = matchLocalCustomIcon($containerName, $hostDir, $urlPrefix);

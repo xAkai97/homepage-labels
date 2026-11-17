@@ -167,6 +167,23 @@ test('Multi-source icon resolution prefixes (si-, sh-, mdi-) in view_components.
             'labelCount'       => 2,
             'error'            => null,
         ],
+        [
+            'name'             => 'test-local',
+            'displayName'      => 'Test Local',
+            'repository'       => 'test/repo',
+            'templateIcon'     => '',
+            'discoveryActive'  => true,
+            'group'            => 'Services',
+            'icon'             => '/icons/urbackup.png',
+            'href'             => 'http://127.0.0.1:9000',
+            'widgetType'       => '',
+            'widgetConfigured' => false,
+            'hasHealth'        => false,
+            'hasBackup'        => false,
+            'pendingRecreate'  => false,
+            'labelCount'       => 2,
+            'error'            => null,
+        ],
     ];
 
     $html = renderDashboardTable($summaries);
@@ -174,6 +191,7 @@ test('Multi-source icon resolution prefixes (si-, sh-, mdi-) in view_components.
     assertTrue(strpos($html, 'cdn.jsdelivr.net/npm/simple-icons@latest/icons/docker.svg') !== false, 'Resolves si- prefix to Simple Icons CDN');
     assertTrue(strpos($html, 'cdn.jsdelivr.net/gh/selfhst/icons/svg/sonarr.svg') !== false, 'Resolves sh- prefix to Selfh.st CDN');
     assertTrue(strpos($html, 'cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/server.svg') !== false, 'Resolves mdi- prefix to MDI CDN');
+    assertTrue(strpos($html, 'apply_labels.php?action=get_icon_thumb') !== false, 'Resolves local icon path to get_icon_thumb stream');
     return true;
 });
 
