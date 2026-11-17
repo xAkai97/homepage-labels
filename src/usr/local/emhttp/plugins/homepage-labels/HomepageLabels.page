@@ -99,6 +99,7 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         font-family: inherit !important;
         color: inherit;
     }
+    /* Neutralize Unraid Dynamix global button[type=button] margin: 10px 12px 10px 0 */
     .homepage-root button,
     .homepage-root button[type="button"] {
         margin: 0;
@@ -306,6 +307,7 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         gap: 4px;
         box-sizing: border-box;
     }
+    /* Tag selector beats Unraid global button[type=button] specificity (0,1,1) and resets margin/padding/border/uppercase rules */
     button.homepage-filter-pill,
     .homepage-filter-pill {
         margin: 0 !important;
