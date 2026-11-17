@@ -4,7 +4,7 @@
   <!ENTITY name        "homepage-labels">
   <!ENTITY author      "xAkai97">
   <!ENTITY version     "2026.11.17">
-  <!ENTITY gitURL      "https://raw.githubusercontent.com/xAkai97/homepage-labels/dev">
+  <!ENTITY gitURL      "https://raw.githubusercontent.com/xAkai97/homepage-labels/main">
   <!ENTITY pluginURL   "&gitURL;/homepage-labels.plg">
   <!ENTITY pkgURL      "&gitURL;/archive/&name;-&version;.txz">
   <!ENTITY md5         "">
