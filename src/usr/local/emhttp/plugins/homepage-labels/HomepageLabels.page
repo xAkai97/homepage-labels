@@ -99,6 +99,10 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         font-family: inherit !important;
         color: inherit;
     }
+    .homepage-root button,
+    .homepage-root button[type="button"] {
+        margin: 0;
+    }
     .homepage-root.homepage-scale-100 {
         --homepage-scale: 1.0;
         font-size: 100%;
@@ -298,32 +302,46 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         background: rgba(120, 120, 120, 0.1);
         border: 1px solid rgba(120, 120, 120, 0.25);
         border-radius: 6px;
-        padding: 3px;
+        padding: 4px;
         gap: 4px;
+        box-sizing: border-box;
     }
+    button.homepage-filter-pill,
     .homepage-filter-pill {
-        background: transparent;
-        border: none;
-        outline: none;
-        padding: 5px 12px;
-        border-radius: 4px;
-        font-size: 0.88em;
-        font-weight: 500;
-        cursor: pointer;
-        color: inherit;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.15s ease;
+        margin: 0 !important;
+        padding: 5px 12px !important;
+        background: transparent !important;
+        border: 1px solid transparent !important;
+        outline: none !important;
+        box-shadow: none !important;
+        border-radius: 4px !important;
+        font-size: 0.88em !important;
+        font-weight: 500 !important;
+        letter-spacing: normal !important;
+        text-transform: none !important;
+        line-height: 1.2 !important;
+        cursor: pointer !important;
+        color: inherit !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        transition: all 0.15s ease !important;
     }
+    button.homepage-filter-pill:hover,
     .homepage-filter-pill:hover {
-        background: rgba(120, 120, 120, 0.15);
+        background: rgba(120, 120, 120, 0.15) !important;
+        border-color: transparent !important;
+        color: inherit !important;
     }
+    button.homepage-filter-pill.active,
     .homepage-filter-pill.active {
-        background: var(--hp-primary, #e65100);
-        color: #ffffff;
-        font-weight: 600;
+        background: var(--hp-primary, #e65100) !important;
+        border-color: var(--hp-primary, #e65100) !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
     }
+    button.homepage-filter-pill.active i,
     .homepage-filter-pill.active i {
         color: #ffffff !important;
     }
