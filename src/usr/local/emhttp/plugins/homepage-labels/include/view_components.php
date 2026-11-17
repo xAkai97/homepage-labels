@@ -313,7 +313,13 @@ function renderInteractiveFieldRow($target, $value, $metadata, $isActive, $isReq
     // Disabled attribute for dimmed fields (prevents inclusion in form serialization)
     $disabledAttr = (!$isActive && !$isRequired) ? ' disabled' : '';
 
-    $isSecret = ($fieldType === 'password' || $mask || isMaskTrue($configAttrs['mask'] ?? false));
+    // Determine whether this field is sensitive (passwords, API keys, tokens, secrets, or explicitly masked)
+    $isSensitive = ($fieldType === 'password'
+        || !empty($metadata['mask'])
+        || (bool)preg_match('/(key|token|secret|password|passwd|pass|auth|apikey)/i', $target)
+        || isMaskTrue($configAttrs['mask'] ?? false));
+
+    $isSecret = $isSensitive;
 
     if ($target === 'homepage.group') {
         // Special combobox for group
@@ -357,8 +363,8 @@ function renderInteractiveFieldRow($target, $value, $metadata, $isActive, $isReq
         $html .= ' <a href="https://gethomepage.dev/configs/service-widgets/icons/" target="_blank" rel="noopener noreferrer" class="homepage-btn homepage-btn--secondary" title="View official Homepage icon reference guide"><i class="fa fa-book"></i> Icon Guide <i class="fa fa-external-link" style="font-size:0.8em;opacity:0.7;"></i></a>' . "\n";
     }
 
-    // Secret Reveal / Conceal Toggle ([👁])
-    if ($target !== 'homepage.group' && !($fieldType === 'select' && isset($metadata['options']))) {
+    // Secret Reveal / Conceal Toggle ([👁]) - only rendered for sensitive fields (passwords, API keys, tokens, secrets)
+    if ($isSensitive && $target !== 'homepage.group' && !($fieldType === 'select' && isset($metadata['options']))) {
         $secretBtnStyle = ($isSecret && $isActive) ? '' : ' style="display:none;"';
         $html .= ' <button type="button" class="homepage-btn homepage-btn--secret-toggle" title="Show secret" onclick="homepageToggleSecretVisibility(this)"' . $secretBtnStyle . '><i class="fa fa-eye"></i></button>' . "\n";
     }

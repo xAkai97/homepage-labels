@@ -195,6 +195,25 @@ test('Secret fields render single reveal toggle without redundant inline mask ch
     assertTrue(strpos($secretHtml, '<option value="true" selected>Yes</option>') !== false, 'Config drawer Password Mask defaults to Yes');
     assertFalse(strpos($secretHtml, 'homepage-mask-toggle') !== false, 'Redundant inline homepage-mask-toggle checkbox is removed');
 
+    // Verify non-sensitive fields (Display Name, Homepage Icon, External URL) do NOT render secret toggle button
+    $nameHtml = renderInteractiveFieldRow(
+        'homepage.name',
+        'binhex-urbackup',
+        ['label' => 'Display Name', 'type' => 'text', 'required' => true, 'mask' => false],
+        true,
+        true
+    );
+    assertFalse(strpos($nameHtml, 'homepage-btn--secret-toggle') !== false, 'Non-sensitive field (Display Name) does not render secret toggle button');
+
+    $iconHtml = renderInteractiveFieldRow(
+        'homepage.icon',
+        'urbackup.png',
+        ['label' => 'Homepage Icon', 'type' => 'text', 'required' => false, 'mask' => false],
+        true,
+        false
+    );
+    assertFalse(strpos($iconHtml, 'homepage-btn--secret-toggle') !== false, 'Non-sensitive field (Homepage Icon) does not render secret toggle button');
+
     $defaults = getDefaultPluginSettings();
     $presets = loadAllPresets();
     $formHtml = renderEditorForm('Sonarr', [

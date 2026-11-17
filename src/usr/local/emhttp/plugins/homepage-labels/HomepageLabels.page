@@ -958,7 +958,7 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         height: 2.25em !important;
         padding: 0 !important;
         box-sizing: border-box !important;
-        display: inline-flex !important;
+        display: inline-flex;
         align-items: center !important;
         justify-content: center !important;
         cursor: pointer;
@@ -967,6 +967,10 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         vertical-align: middle;
         opacity: 0.8;
         transition: all 0.15s ease-in-out;
+    }
+    .homepage-btn--secret-toggle[style*="display:none"],
+    .homepage-btn--secret-toggle[style*="display: none"] {
+        display: none !important;
     }
     .homepage-btn--secret-toggle:hover {
         opacity: 1;
