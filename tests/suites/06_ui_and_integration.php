@@ -53,6 +53,12 @@ test('Unified Tabbed Navigation (Option 2) hides duplicate Settings icon and sup
     assertTrue(strpos($settingsPage, 'Menu="Hidden"') !== false, 'Settings page uses Menu="Hidden" to avoid duplicate User Utilities icon');
     assertTrue(strpos($mainPage, '/Settings/HomepageLabels?tab=settings') !== false, 'Main page links to ?tab=settings');
     assertTrue(strpos($settingsPage, 'DOCKER_EDIT_OVERLAY') !== false, 'Settings page includes DOCKER_EDIT_OVERLAY configuration');
+    assertTrue(strpos($settingsPage, '<input type="button" id="btn-done-settings" value="Done"') !== false, 'Settings page renders native input button for Done');
+    assertFalse(strpos($settingsPage, '<a href="/Settings/HomepageLabels" class="button"') !== false, 'Settings page removes stretched anchor Done buttons');
+    assertEqual(substr_count($settingsPage, 'name="submit_settings"'), 6, 'Settings page preserves per-section Apply buttons plus bottom Apply button');
+    assertEqual(substr_count($settingsPage, 'id="btn-done-settings"'), 1, 'Settings page renders only a single Done button at the bottom');
+    assertTrue(strpos($settingsPage, '<input type="button" id="btn-download-support-bundle"') !== false, 'Support bundle uses native input button instead of stretched anchor/button');
+    assertFalse(strpos($settingsPage, 'class="button"') !== false, 'Settings page avoids Unraid stretched .button class');
     return true;
 });
 
@@ -164,9 +170,38 @@ test('Multi-source icon resolution prefixes (si-, sh-, mdi-) in view_components.
     ];
 
     $html = renderDashboardTable($summaries);
+    assertTrue(strpos($html, 'class="homepage-row-actions"') !== false, 'Dashboard row actions use flex container');
     assertTrue(strpos($html, 'cdn.jsdelivr.net/npm/simple-icons@latest/icons/docker.svg') !== false, 'Resolves si- prefix to Simple Icons CDN');
     assertTrue(strpos($html, 'cdn.jsdelivr.net/gh/selfhst/icons/svg/sonarr.svg') !== false, 'Resolves sh- prefix to Selfh.st CDN');
     assertTrue(strpos($html, 'cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/server.svg') !== false, 'Resolves mdi- prefix to MDI CDN');
+    return true;
+});
+
+test('Secret fields render single reveal toggle without redundant inline mask checkbox', function() {
+    if (!function_exists('renderInteractiveFieldRow')) {
+        require_once dirname(__DIR__, 2) . '/src/usr/local/emhttp/plugins/homepage-labels/include/view_components.php';
+    }
+    $secretHtml = renderInteractiveFieldRow(
+        'homepage.widget.key',
+        'super-secret-api-key',
+        ['label' => 'API Key', 'type' => 'password', 'mask' => true],
+        true,
+        false
+    );
+
+    assertTrue(strpos($secretHtml, '<input type="password"') !== false, 'Secret field renders as password input');
+    assertTrue(strpos($secretHtml, 'homepage-btn--secret-toggle" title="Show secret"') !== false, 'Secret field renders single reveal toggle button');
+    assertTrue(strpos($secretHtml, 'class="cfg-attr-mask"') !== false, 'Config drawer mask select is present');
+    assertTrue(strpos($secretHtml, '<option value="true" selected>Yes</option>') !== false, 'Config drawer Password Mask defaults to Yes');
+    assertFalse(strpos($secretHtml, 'homepage-mask-toggle') !== false, 'Redundant inline homepage-mask-toggle checkbox is removed');
+
+    $defaults = getDefaultPluginSettings();
+    $presets = loadAllPresets();
+    $formHtml = renderEditorForm('Sonarr', [
+        'homepage.custom.apikey' => ['value' => 'abc123', 'mask' => 'true'],
+    ], null, $presets, ['Media'], [], $defaults);
+    assertFalse(strpos($formHtml, 'homepage-mask-toggle') !== false, 'Custom secret row does not render redundant inline homepage-mask-toggle checkbox');
+    assertFalse(strpos($formHtml, 'homepage-mockup-wrapper') !== false, 'Card mockup is removed from editor form');
     return true;
 });
 

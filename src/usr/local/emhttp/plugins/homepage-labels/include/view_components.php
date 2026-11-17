@@ -157,22 +157,24 @@ function renderDashboardTable($containers) {
 
         // Actions
         $rowHtml .= '<td style="text-align:right;white-space:nowrap;">';
+        $rowHtml .= '<div class="homepage-row-actions">';
         if (!empty($container['href']) && filter_var($container['href'], FILTER_VALIDATE_URL)) {
-            $rowHtml .= '<a href="' . htmlspecialchars($container['href']) . '" target="_blank" rel="noopener noreferrer" class="homepage-btn homepage-btn--config" title="Open WebUI (' . htmlspecialchars($container['href']) . ')"><i class="fa fa-external-link"></i></a> ';
+            $rowHtml .= '<a href="' . htmlspecialchars($container['href']) . '" target="_blank" rel="noopener noreferrer" class="homepage-btn homepage-btn--config homepage-btn--icon-only" title="Open WebUI (' . htmlspecialchars($container['href']) . ')"><i class="fa fa-external-link"></i></a>';
         }
         if ($pending) {
-            $rowHtml .= '<button type="button" class="homepage-btn homepage-btn--apply" onclick="homepageRecreateSingle(\'' . $name . '\')" title="Recreate container now to apply pending labels"><i class="fa fa-refresh"></i> Apply</button> ';
+            $rowHtml .= '<button type="button" class="homepage-btn homepage-btn--apply" onclick="homepageRecreateSingle(\'' . $name . '\')" title="Recreate container now to apply pending labels"><i class="fa fa-refresh"></i> Apply</button>';
         }
         $rowHtml .= '<button type="button" class="homepage-btn homepage-btn--edit" onclick="homepageEditContainer(\'' . $name . '\')">';
-        $rowHtml .= '<i class="fa fa-tags"></i> Edit Labels</button> ';
+        $rowHtml .= '<i class="fa fa-tags"></i> Edit Labels</button>';
         if (!$active && !empty($container['hasBackup'])) {
-            $rowHtml .= '<button type="button" class="homepage-btn homepage-btn--restore" onclick="homepageRestoreContainer(\'' . $name . '\')" title="Restore backed-up Homepage labels"><i class="fa fa-undo"></i> Restore</button> ';
+            $rowHtml .= '<button type="button" class="homepage-btn homepage-btn--restore" onclick="homepageRestoreContainer(\'' . $name . '\')" title="Restore backed-up Homepage labels"><i class="fa fa-undo"></i> Restore</button>';
         }
-        $rowHtml .= '<a href="/Docker/UpdateContainer?xmlTemplate=edit:/boot/config/plugins/dockerMan/templates-user/my-' . $name . '.xml" class="homepage-btn homepage-btn--config" title="Edit Unraid container template (ports, volumes, paths)"><i class="fa fa-sliders"></i> Config</a> ';
+        $rowHtml .= '<a href="/Docker/UpdateContainer?xmlTemplate=edit:/boot/config/plugins/dockerMan/templates-user/my-' . $name . '.xml" class="homepage-btn homepage-btn--config" title="Edit Unraid container template (ports, volumes, paths)"><i class="fa fa-sliders"></i> Config</a>';
         if ($active) {
-            $rowHtml .= '<button type="button" class="homepage-btn homepage-btn--disable" onclick="homepageDisableContainer(\'' . $name . '\')" title="Disable Homepage Discovery (Removes discovery labels without stopping container)">';
+            $rowHtml .= '<button type="button" class="homepage-btn homepage-btn--disable homepage-btn--icon-only" onclick="homepageDisableContainer(\'' . $name . '\')" title="Disable Homepage Discovery (Removes discovery labels without stopping container)">';
             $rowHtml .= '<i class="fa fa-power-off"></i></button>';
         }
+        $rowHtml .= '</div>';
         $rowHtml .= '</td>';
 
         $rowHtml .= '</tr>' . "\n";
@@ -311,10 +313,7 @@ function renderInteractiveFieldRow($target, $value, $metadata, $isActive, $isReq
     // Disabled attribute for dimmed fields (prevents inclusion in form serialization)
     $disabledAttr = (!$isActive && !$isRequired) ? ' disabled' : '';
 
-    $isMaskChecked = (isset($configAttrs['mask'])) ?
-        isMaskTrue($configAttrs['mask']) :
-        ($fieldType === 'password' || $mask);
-    $isSecret = ($fieldType === 'password' || $mask || $isMaskChecked);
+    $isSecret = ($fieldType === 'password' || $mask || isMaskTrue($configAttrs['mask'] ?? false));
 
     if ($target === 'homepage.group') {
         // Special combobox for group
@@ -359,18 +358,9 @@ function renderInteractiveFieldRow($target, $value, $metadata, $isActive, $isReq
     }
 
     // Secret Reveal / Conceal Toggle ([👁])
-    if ($isSecret) {
-        $secretBtnStyle = $isActive ? '' : ' style="display:none;"';
+    if ($target !== 'homepage.group' && !($fieldType === 'select' && isset($metadata['options']))) {
+        $secretBtnStyle = ($isSecret && $isActive) ? '' : ' style="display:none;"';
         $html .= ' <button type="button" class="homepage-btn homepage-btn--secret-toggle" title="Show secret" onclick="homepageToggleSecretVisibility(this)"' . $secretBtnStyle . '><i class="fa fa-eye"></i></button>' . "\n";
-    }
-
-    // Mask secret XML toggle
-    if ($isSecret) {
-        $maskInputId = 'mask-' . $inputId;
-        $checkedAttr = $isMaskChecked ? ' checked' : '';
-        $maskStyle = $isActive ? '' : ' style="display:none;"';
-        $html .= ' <label class="homepage-mask-toggle" for="' . $maskInputId . '" title="Mask value in Unraid template XML"' . $maskStyle . '>' . "\n";
-        $html .= '<input type="checkbox" id="' . $maskInputId . '" name="masks[' . $safeTarget . ']" value="true"' . $checkedAttr . $disabledAttr . ' onchange="homepageSyncMask(this)"> <i class="fa fa-eye-slash"></i></label>' . "\n";
     }
 
     // Advanced Config Drawer Toggle Button
@@ -522,21 +512,7 @@ function renderTemplateToolbar($presetList, $userTemplates, $settings = []) {
     $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
     $html = '<div class="homepage-template-toolbar">' . "\n";
 
-    // Group 1: Global View Controls (Expand, Collapse, Advanced XML Mode, Readability Scale)
-    $html .= '<div class="homepage-template-group">' . "\n";
-    $html .= '<button type="button" class="homepage-btn homepage-btn--config" onclick="homepageExpandAll()"><i class="fa fa-folder-open-o"></i> Expand All</button> ';
-    $html .= '<button type="button" class="homepage-btn homepage-btn--config" onclick="homepageCollapseAll()"><i class="fa fa-folder-o"></i> Collapse All</button> ';
-    $html .= '<button type="button" class="homepage-btn homepage-btn--config" id="btn-toggle-advanced-xml" onclick="homepageToggleAdvancedXmlMode()" title="Toggle advanced Unraid XML &lt;Config&gt; attributes on all fields"><i class="fa fa-sliders"></i> Advanced XML Mode</button> ';
-    $html .= '<div class="homepage-scale-switcher" title="Adjust text size & UI readability">' .
-        '<i class="fa fa-text-height"></i> <select id="homepage-scale-select-editor" name="homepage_scale" onchange="homepageChangeFontScale(this.value)">' .
-        '<option value="100"' . ($fontScale === '100' ? ' selected' : '') . '>100% (Default Unraid)</option>' .
-        '<option value="110"' . ($fontScale === '110' ? ' selected' : '') . '>110% (+10%)</option>' .
-        '<option value="125"' . ($fontScale === '125' ? ' selected' : '') . '>125% (+25%)</option>' .
-        '<option value="140"' . ($fontScale === '140' ? ' selected' : '') . '>140% (+40%)</option>' .
-        '</select></div>';
-    $html .= '</div>' . "\n";
-
-    // Group 2: Unified Presets & Custom Templates Selector + Actions
+    // Group 1: Unified Presets & Custom Templates Selector + Actions
     $html .= '<div class="homepage-template-group homepage-template-group--unified">' . "\n";
     $html .= '<select id="unified-template-select" class="homepage-template-select" onchange="homepageOnUnifiedTemplateChange(this.value)" title="Choose a default preset or custom template to apply">' . "\n";
     $html .= '<option value="">-- Choose Preset or Template --</option>' . "\n";
@@ -594,6 +570,20 @@ function renderTemplateToolbar($presetList, $userTemplates, $settings = []) {
     }
     $html .= '</select>' . "\n";
 
+    $html .= '</div>' . "\n";
+
+    // Group 2: Global View Controls (Expand, Collapse, Advanced XML Mode, Readability Scale)
+    $html .= '<div class="homepage-template-group">' . "\n";
+    $html .= '<button type="button" class="homepage-btn homepage-btn--config" onclick="homepageExpandAll()"><i class="fa fa-folder-open-o"></i> Expand All</button> ';
+    $html .= '<button type="button" class="homepage-btn homepage-btn--config" onclick="homepageCollapseAll()"><i class="fa fa-folder-o"></i> Collapse All</button> ';
+    $html .= '<button type="button" class="homepage-btn homepage-btn--config" id="btn-toggle-advanced-xml" onclick="homepageToggleAdvancedXmlMode()" title="Toggle advanced Unraid XML &lt;Config&gt; attributes on all fields"><i class="fa fa-sliders"></i> Advanced XML Mode</button> ';
+    $html .= '<div class="homepage-scale-switcher" title="Adjust text size & UI readability">' .
+        '<i class="fa fa-text-height"></i> <select id="homepage-scale-select-editor" name="homepage_scale" onchange="homepageChangeFontScale(this.value)">' .
+        '<option value="100"' . ($fontScale === '100' ? ' selected' : '') . '>100% (Default Unraid)</option>' .
+        '<option value="110"' . ($fontScale === '110' ? ' selected' : '') . '>110% (+10%)</option>' .
+        '<option value="125"' . ($fontScale === '125' ? ' selected' : '') . '>125% (+25%)</option>' .
+        '<option value="140"' . ($fontScale === '140' ? ' selected' : '') . '>140% (+40%)</option>' .
+        '</select></div>';
     $html .= '</div>' . "\n";
 
     $html .= '</div>' . "\n"; // .homepage-template-toolbar
@@ -862,7 +852,6 @@ function renderEditorForm($containerName, $labels, $preset, $presetList, $groupS
         $customValType = $customMasked ? 'password' : 'text';
         $customHtml .= '<input type="' . $customValType . '" class="custom-val" id="custom-val-' . $cIdx . '" name="custom_label_vals[]" value="' . $customValue . '" placeholder="value" oninput="homepageOnFieldChange()">' . "\n";
         $customHtml .= '<button type="button" class="homepage-btn homepage-btn--secret-toggle custom-secret-toggle" title="Show secret" onclick="homepageToggleSecretVisibility(this)"' . ($customMasked ? '' : ' style="display:none;"') . '><i class="fa fa-eye"></i></button>' . "\n";
-        $customHtml .= '<label class="homepage-mask-toggle" for="custom-mask-' . $cIdx . '" title="Mask value in Unraid template XML"><input type="checkbox" class="custom-mask" id="custom-mask-' . $cIdx . '" name="custom_label_masks[]" value="true"' . ($customMasked ? ' checked' : '') . ' onchange="homepageOnCustomMaskChange(this)"> <i class="fa fa-eye-slash"></i></label>' . "\n";
         $customHtml .= '<button type="button" class="homepage-btn homepage-btn--field-config" title="Advanced Unraid XML &lt;Config&gt; attributes" onclick="homepageToggleCustomConfig(this)"><i class="fa fa-cog"></i> Config</button>' . "\n";
         $customHtml .= '<button type="button" class="homepage-btn homepage-btn--remove" onclick="$(this).closest(\'.homepage-custom-row\').remove(); homepageUpdateBadge(\'custom\'); homepageOnFieldChange();"><i class="fa fa-trash"></i></button>' . "\n";
         $customHtml .= '</div>' . "\n"; // .homepage-custom-main-wrap
@@ -887,39 +876,6 @@ function renderEditorForm($containerName, $labels, $preset, $presetList, $groupS
 
     // --- Live Discovery Preview & Code Exporter ---
     $previewHtml = '<div class="homepage-preview-container">' . "\n";
-
-    // Visual Homepage Service Card Mockup
-    $previewHtml .= '<div class="homepage-mockup-wrapper">' . "\n";
-    $previewHtml .= '<div class="homepage-mockup-header-label"><i class="fa fa-desktop"></i> Homepage Dashboard Card Mockup <span style="font-size:0.85em;opacity:0.75;font-weight:400;margin-left:6px;">(Live preview of how this service card renders on Homepage)</span></div>' . "\n";
-    $previewHtml .= '<div class="homepage-mockup-board">' . "\n";
-    $previewHtml .= '<div class="homepage-mockup-group-title"><i class="fa fa-folder-open-o"></i> <span id="mockup-group-text">Services</span></div>' . "\n";
-    $previewHtml .= '<div class="homepage-mockup-card">' . "\n";
-    $previewHtml .= '<div class="homepage-mockup-card-body">' . "\n";
-    $previewHtml .= '<div class="homepage-mockup-icon-wrap" id="mockup-icon-wrap">' . "\n";
-    $previewHtml .= '<img id="mockup-icon-img" src="" class="homepage-mockup-icon" alt="" style="display:none;" onerror="this.style.display=\'none\';document.getElementById(\'mockup-icon-fallback\').style.display=\'flex\';">' . "\n";
-    $previewHtml .= '<span id="mockup-icon-fallback" class="homepage-mockup-icon-fallback"><i class="fa fa-cube"></i></span>' . "\n";
-    $previewHtml .= '</div>' . "\n";
-    $previewHtml .= '<div class="homepage-mockup-info">' . "\n";
-    $previewHtml .= '<div class="homepage-mockup-title-row">' . "\n";
-    $previewHtml .= '<span class="homepage-mockup-title" id="mockup-title-text">' . $safeName . '</span>' . "\n";
-    $previewHtml .= '<span class="homepage-mockup-status-dot" id="mockup-status-dot" style="display:none;" title="SiteMonitor / Ping Health Indicator"></span>' . "\n";
-    $previewHtml .= '</div>' . "\n";
-    $previewHtml .= '<div class="homepage-mockup-desc" id="mockup-desc-text" style="display:none;"></div>' . "\n";
-    $previewHtml .= '</div>' . "\n";
-    $previewHtml .= '</div>' . "\n"; // .homepage-mockup-card-body
-    $previewHtml .= '<div class="homepage-mockup-widget" id="mockup-widget-wrap" style="display:none;">' . "\n";
-    $previewHtml .= '<div class="homepage-mockup-widget-header">' . "\n";
-    $previewHtml .= '<span class="homepage-mockup-widget-type" id="mockup-widget-type-text"><i class="fa fa-puzzle-piece"></i> Widget</span>' . "\n";
-    $previewHtml .= '<span class="homepage-mockup-widget-live-dot" title="Widget Active"></span>' . "\n";
-    $previewHtml .= '</div>' . "\n";
-    $previewHtml .= '<div class="homepage-mockup-widget-stats" id="mockup-widget-stats">' . "\n";
-    $previewHtml .= '<span class="homepage-mockup-stat-pill"><span class="stat-lbl">Status</span><span class="stat-val">Active</span></span>' . "\n";
-    $previewHtml .= '<span class="homepage-mockup-stat-pill"><span class="stat-lbl">Service</span><span class="stat-val">Online</span></span>' . "\n";
-    $previewHtml .= '</div>' . "\n";
-    $previewHtml .= '</div>' . "\n"; // .homepage-mockup-widget
-    $previewHtml .= '</div>' . "\n"; // .homepage-mockup-card
-    $previewHtml .= '</div>' . "\n"; // .homepage-mockup-board
-    $previewHtml .= '</div>' . "\n"; // .homepage-mockup-wrapper
 
     $previewHtml .= '<div class="homepage-preview-toolbar">' . "\n";
     $previewHtml .= '<div class="homepage-filters">' . "\n";

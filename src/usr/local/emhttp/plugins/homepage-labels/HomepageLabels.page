@@ -73,11 +73,24 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
     /* --- Readability & UI Scale System (Inherits 100% Unraid Native Base) --- */
     .homepage-root {
         --homepage-scale: 1.0;
+        --hp-primary: #e65100;
+        --hp-bg-surface: var(--background-color, var(--bg-level-1, #ffffff));
+        --hp-bg-elevated: var(--background-color, var(--bg-level-2, #f8f8f8));
+        --hp-border: var(--line-color, rgba(120, 120, 120, 0.28));
+        --hp-text-muted: rgba(120, 120, 120, 0.85);
         font-family: inherit;
         font-size: 100%;
         line-height: inherit;
         color: inherit;
         transition: font-size 0.15s ease;
+    }
+    html.black .homepage-root,
+    body.dark .homepage-root,
+    html.dark .homepage-root {
+        --hp-bg-surface: var(--background-color, #1e1e1e);
+        --hp-bg-elevated: var(--background-color, #242424);
+        --hp-border: var(--line-color, rgba(255, 255, 255, 0.16));
+        --hp-text-muted: rgba(200, 200, 200, 0.78);
     }
     .homepage-root input,
     .homepage-root select,
@@ -187,14 +200,21 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         min-width: 17.5em;
         max-height: 24em;
         overflow-y: auto;
-        background: var(--background-color, var(--bg-level-2, #ffffff));
+        background: var(--hp-bg-elevated);
         color: var(--text-color, inherit);
-        border: 1px solid var(--line-color, rgba(120, 120, 120, 0.35));
+        border: 1px solid var(--hp-border);
         border-radius: 0.45em;
         box-shadow: 0 0.35em 1.2em rgba(0, 0, 0, 0.2);
         z-index: 1050;
         margin: 0;
         padding: 0.3em 0 0.5em 0;
+    }
+    html.black .homepage-dropdown-menu,
+    body.dark .homepage-dropdown-menu,
+    html.dark .homepage-dropdown-menu {
+        background: var(--hp-bg-elevated, #242424) !important;
+        border-color: var(--hp-border, #444444) !important;
+        box-shadow: 0 0.4em 1.2em rgba(0, 0, 0, 0.55) !important;
     }
     .homepage-dropdown-header {
         display: flex;
@@ -277,16 +297,16 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         align-items: center;
         background: rgba(120, 120, 120, 0.1);
         border: 1px solid rgba(120, 120, 120, 0.25);
-        border-radius: 20px;
-        padding: 3px 8px;
+        border-radius: 6px;
+        padding: 3px;
         gap: 4px;
     }
     .homepage-filter-pill {
         background: transparent;
         border: none;
         outline: none;
-        padding: 4px 12px;
-        border-radius: 16px;
+        padding: 5px 12px;
+        border-radius: 4px;
         font-size: 0.88em;
         font-weight: 500;
         cursor: pointer;
@@ -295,10 +315,6 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         align-items: center;
         gap: 6px;
         transition: all 0.15s ease;
-    }
-    .homepage-filter-pill[data-filter="all"] {
-        padding-left: 20px;
-        padding-right: 14px;
     }
     .homepage-filter-pill:hover {
         background: rgba(120, 120, 120, 0.15);
@@ -588,6 +604,12 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
     html.dark .homepage-group-header-row {
         background: rgba(255, 255, 255, 0.04) !important;
     }
+    .homepage-group-header-row--active .homepage-group-header-cell {
+        border-left: 3px solid #27ae60 !important;
+    }
+    .homepage-group-header-row--inactive .homepage-group-header-cell {
+        border-left: 3px solid rgba(120, 120, 120, 0.45) !important;
+    }
 
     /* --- Container Column --- */
     .homepage-container-col {
@@ -724,6 +746,16 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
     }
 
     /* --- Buttons & Action Controls --- */
+    .homepage-row-actions {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.4em;
+    }
+    a.homepage-btn.homepage-btn--icon-only, button.homepage-btn.homepage-btn--icon-only {
+        width: 2.25em !important;
+        padding: 0 !important;
+    }
     a.homepage-btn, button.homepage-btn {
         display: inline-flex !important;
         align-items: center !important;
@@ -881,7 +913,8 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         color: #66bb6a !important;
         background: transparent !important;
         margin-top: 0.65em !important;
-        height: 2.2em !important;
+        padding: 0 1.1em !important;
+        height: 2.25em !important;
     }
 
     /* --- Form Controls & Buttons --- */
@@ -899,13 +932,6 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
     }
     input.homepage-btn-apply:hover {
         background: #f4511e !important;
-    }
-    .homepage-btn--add {
-        border-color: #66bb6a !important;
-        color: #66bb6a !important;
-        background: transparent !important;
-        margin-top: 0.65em !important;
-        padding: 0.5em 1.1em !important;
     }
     .homepage-help {
         display: block;
@@ -928,12 +954,17 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         border: 1px solid rgba(128, 128, 128, 0.35) !important;
         color: inherit !important;
         border-radius: 4px !important;
-        padding: 0.35em 0.65em !important;
+        width: 2.25em !important;
+        height: 2.25em !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         cursor: pointer;
         font-size: 0.9em !important;
         line-height: 1 !important;
         vertical-align: middle;
-        margin-left: 0.4em;
         opacity: 0.8;
         transition: all 0.15s ease-in-out;
     }
@@ -941,22 +972,6 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         opacity: 1;
         background: rgba(128, 128, 128, 0.18) !important;
         border-color: rgba(128, 128, 128, 0.6) !important;
-    }
-    .homepage-mask-toggle {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4em;
-        margin-left: 0.7em;
-        cursor: pointer;
-        font-size: 0.95em;
-        opacity: 0.8;
-        user-select: none;
-    }
-    .homepage-mask-toggle:hover {
-        opacity: 1;
-    }
-    .homepage-mask-toggle input:checked + i {
-        color: #e67e22;
     }
 
     /* --- Custom Group Combobox (Unraid UI Native Style) --- */
@@ -969,8 +984,11 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
     }
     .homepage-combobox-wrap input.homepage-combobox-input {
         width: 100% !important;
-        padding: 0.55em 2.4em 0.55em 0.85em !important;
+        height: 2.25em;
+        padding: 0.4em 2.4em 0.4em 0.8em !important;
         box-sizing: border-box;
+        border: 1px solid rgba(120, 120, 120, 0.32) !important;
+        background: rgba(120, 120, 120, 0.06) !important;
         border-radius: 0.4em !important;
         font-size: 0.98em !important;
     }
@@ -1003,8 +1021,8 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         right: 0;
         max-height: 15em;
         overflow-y: auto;
-        background: #ffffff;
-        border: 1px solid rgba(120, 120, 120, 0.35);
+        background: var(--hp-bg-elevated, #ffffff);
+        border: 1px solid var(--hp-border, rgba(120, 120, 120, 0.35));
         border-radius: 0.55em;
         box-shadow: 0 0.4em 1.2em rgba(0,0,0,0.14);
         z-index: 1050;
@@ -1057,8 +1075,8 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
     html.black .homepage-combobox-menu,
     body.dark .homepage-combobox-menu,
     html.dark .homepage-combobox-menu {
-        background: #242424 !important;
-        border-color: #444444 !important;
+        background: var(--hp-bg-elevated, #242424) !important;
+        border-color: var(--hp-border, #444444) !important;
         box-shadow: 0 0.4em 1.2em rgba(0,0,0,0.55) !important;
     }
     html.black .homepage-combobox-item,
@@ -1085,26 +1103,30 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
     }
 
     /* --- Custom Rows --- */
-    .homepage-custom-row {
-        display: flex;
-        align-items: center;
-        gap: 0.8em;
-        margin-bottom: 0.8em;
-    }
     .homepage-custom-row input.custom-key {
         width: 16em;
-        padding: 0.55em 0.85em;
+        height: 2.25em;
+        padding: 0.4em 0.8em;
+        border: 1px solid rgba(120, 120, 120, 0.32);
+        background: rgba(120, 120, 120, 0.06);
         border-radius: 0.4em;
+        box-sizing: border-box;
     }
     .homepage-custom-row input.custom-val {
         width: 22em;
-        padding: 0.55em 0.85em;
+        height: 2.25em;
+        padding: 0.4em 0.8em;
+        border: 1px solid rgba(120, 120, 120, 0.32);
+        background: rgba(120, 120, 120, 0.06);
         border-radius: 0.4em;
+        box-sizing: border-box;
     }
     .homepage-btn--remove {
         border-color: #e53935;
         color: #e53935;
-        padding: 0.4em 0.8em;
+        width: 2.25em;
+        height: 2.25em;
+        padding: 0;
         border-radius: 0.4em;
     }
     .homepage-btn--remove:hover {
@@ -1242,12 +1264,16 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         gap: 1.1em;
     }
     .homepage-field-row.homepage-field--active {
-        border-color: rgba(120, 120, 120, 0.4);
-        background: transparent;
+        border-color: rgba(120, 120, 120, 0.32);
+        background: rgba(120, 120, 120, 0.035);
         opacity: 1;
     }
+    .homepage-field-row.homepage-field--required {
+        border-left: 3px solid rgba(230, 81, 0, 0.65);
+    }
     .homepage-field-row.homepage-field--dimmed {
-        opacity: 0.45;
+        padding: 0.75em 1.2em;
+        opacity: 0.55;
         border-style: dashed;
         cursor: pointer;
         background: rgba(120, 120, 120, 0.02);
@@ -1314,7 +1340,7 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
     .homepage-field-input-wrap {
         display: flex;
         align-items: center;
-        gap: 0.7em;
+        gap: 0.5em;
         flex-wrap: wrap;
     }
     .homepage-field-input-wrap input[type="text"],
@@ -1324,16 +1350,25 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         flex-grow: 1;
         max-width: 34em;
         min-width: 16em;
+        height: 2.25em;
         font-size: 0.98em;
-        padding: 0.55em 0.85em;
-        border-radius: 0.4em;
+        padding: 0.4em 0.8em;
+        border: 1px solid rgba(120, 120, 120, 0.32) !important;
+        background: rgba(120, 120, 120, 0.06) !important;
+        border-radius: 0.4em !important;
         box-sizing: border-box;
     }
     .homepage-btn--remove-field {
         background: rgba(229, 57, 53, 0.1) !important;
         color: #d32f2f !important;
         border: 1px solid rgba(229, 57, 53, 0.3) !important;
-        padding: 0.4em 0.8em !important;
+        width: 2.25em !important;
+        height: 2.25em !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         border-radius: 0.4em !important;
         cursor: pointer !important;
     }
@@ -1345,7 +1380,9 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         background: rgba(120, 120, 120, 0.12) !important;
         color: inherit !important;
         border: 1px solid rgba(120, 120, 120, 0.28) !important;
-        padding: 0.38em 0.75em !important;
+        height: 2.25em !important;
+        padding: 0 0.75em !important;
+        box-sizing: border-box !important;
         border-radius: 0.4em !important;
         cursor: pointer !important;
         font-size: 0.88em !important;
@@ -1353,6 +1390,7 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         transition: all 0.15s ease !important;
         display: inline-flex !important;
         align-items: center !important;
+        justify-content: center !important;
         gap: 0.4em !important;
     }
     .homepage-btn--field-config:hover {
@@ -1369,8 +1407,8 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
     .homepage-custom-config-drawer {
         margin-top: 0.75em;
         padding: 0.85em 1.1em;
-        background: var(--background-color, var(--bg-level-2, rgba(120, 120, 120, 0.05)));
-        border: 1px solid var(--line-color, rgba(120, 120, 120, 0.25));
+        background: var(--hp-bg-elevated, rgba(120, 120, 120, 0.05));
+        border: 1px solid var(--hp-border, rgba(120, 120, 120, 0.25));
         border-radius: 0.45em;
         width: 100%;
         box-sizing: border-box;
@@ -1489,7 +1527,7 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
     .homepage-template-toolbar {
         display: flex;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: space-between;
         gap: 0.8em 1.2em;
         padding: 0.85em 1.2em;
         border-radius: 0.65em;
@@ -1546,165 +1584,6 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         gap: 0.55em;
     }
 
-    /* --- Homepage Live Card Mockup --- */
-    .homepage-mockup-wrapper {
-        background: rgba(120, 120, 120, 0.06);
-        border: 1px solid rgba(120, 120, 120, 0.22);
-        border-radius: 0.65em;
-        padding: 0.9em 1.2em;
-        margin-bottom: 0.8em;
-    }
-    .homepage-mockup-header-label {
-        font-size: 0.88em;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        opacity: 0.8;
-        margin-bottom: 0.7em;
-        display: flex;
-        align-items: center;
-        gap: 0.45em;
-    }
-    .homepage-mockup-board {
-        display: flex;
-        flex-direction: column;
-        gap: 0.4em;
-    }
-    .homepage-mockup-group-title {
-        font-size: 0.88em;
-        font-weight: 600;
-        opacity: 0.75;
-        letter-spacing: 0.3px;
-        display: flex;
-        align-items: center;
-        gap: 0.45em;
-    }
-    .homepage-mockup-card {
-        background: var(--bg-level-1, rgba(120, 120, 120, 0.1));
-        border: 1px solid rgba(120, 120, 120, 0.3);
-        border-radius: 0.6em;
-        padding: 0.85em 1.1em;
-        max-width: 25em;
-        box-shadow: 0 0.15em 0.5em rgba(0, 0, 0, 0.12);
-        display: flex;
-        flex-direction: column;
-        gap: 0.65em;
-    }
-    .homepage-mockup-card-body {
-        display: flex;
-        align-items: center;
-        gap: 0.85em;
-    }
-    .homepage-mockup-icon-wrap {
-        width: 2.5em;
-        height: 2.5em;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(120, 120, 120, 0.08);
-        border-radius: 0.45em;
-        flex-shrink: 0;
-        overflow: hidden;
-    }
-    .homepage-mockup-icon {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
-    .homepage-mockup-icon-fallback {
-        font-size: 1.3em;
-        opacity: 0.5;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .homepage-mockup-info {
-        display: flex;
-        flex-direction: column;
-        gap: 0.15em;
-        min-width: 0;
-        flex: 1;
-    }
-    .homepage-mockup-title-row {
-        display: flex;
-        align-items: center;
-        gap: 0.55em;
-    }
-    .homepage-mockup-title {
-        font-weight: 700;
-        font-size: 1.05em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .homepage-mockup-status-dot {
-        width: 0.6em;
-        height: 0.6em;
-        border-radius: 50%;
-        background: #2ecc71;
-        box-shadow: 0 0 0.4em rgba(46, 204, 113, 0.65);
-        display: inline-block;
-        flex-shrink: 0;
-    }
-    .homepage-mockup-desc {
-        font-size: 0.84em;
-        opacity: 0.72;
-        line-height: 1.35;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .homepage-mockup-widget {
-        border-top: 1px solid rgba(120, 120, 120, 0.15);
-        padding-top: 0.55em;
-        display: flex;
-        flex-direction: column;
-        gap: 0.35em;
-    }
-    .homepage-mockup-widget-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    .homepage-mockup-widget-type {
-        font-size: 0.78em;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        color: #29b6f6;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35em;
-    }
-    .homepage-mockup-widget-live-dot {
-        width: 0.45em;
-        height: 0.45em;
-        border-radius: 50%;
-        background: #29b6f6;
-    }
-    .homepage-mockup-widget-stats {
-        display: flex;
-        align-items: center;
-        gap: 0.45em;
-        flex-wrap: wrap;
-    }
-    .homepage-mockup-stat-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35em;
-        font-size: 0.76em;
-        padding: 0.18em 0.5em;
-        border-radius: 0.3em;
-        background: rgba(120, 120, 120, 0.14);
-        border: 1px solid rgba(120, 120, 120, 0.22);
-    }
-    .homepage-mockup-stat-pill .stat-lbl {
-        opacity: 0.65;
-    }
-    .homepage-mockup-stat-pill .stat-val {
-        font-weight: 600;
-    }
-
     /* --- Live Preview & Code Block --- */
     .homepage-preview-container {
         display: flex;
@@ -1746,7 +1625,7 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         position: sticky;
         bottom: 0;
         z-index: 50;
-        background: var(--background-color, #1e1e1e);
+        background: var(--hp-bg-surface);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
         display: flex;
@@ -1755,7 +1634,7 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         gap: 0.8em;
         margin-top: 1.6em;
         padding: 1em 1.2em;
-        border-top: 1px solid var(--line-color, rgba(120, 120, 120, 0.25));
+        border-top: 1px solid var(--hp-border);
         border-radius: 0 0 6px 6px;
         box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.12);
         flex-wrap: wrap;
@@ -1786,9 +1665,9 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         box-sizing: border-box;
     }
     .homepage-modal-dialog {
-        background: var(--background-color, #242424);
-        color: var(--text-color, #e0e0e0);
-        border: 1px solid var(--line-color, rgba(120, 120, 120, 0.35));
+        background: var(--hp-bg-elevated);
+        color: var(--text-color, inherit);
+        border: 1px solid var(--hp-border);
         border-radius: 0.75em;
         width: 100%;
         max-width: 58em;
@@ -1883,7 +1762,7 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         align-items: center;
         justify-content: space-between;
         gap: 1em;
-        background: var(--background-color, #242424);
+        background: var(--hp-bg-elevated);
         border: 1px solid #e65100;
         box-shadow: 0 0.5em 1.8em rgba(0, 0, 0, 0.45);
         border-radius: 0.65em;
@@ -1981,12 +1860,15 @@ $isEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
         background: rgba(255, 152, 0, 0.15) !important;
         border: 1px solid #ff9800 !important;
         color: #ff9800 !important;
-        padding: 0.3em 0.7em !important;
+        height: 2.25em !important;
+        padding: 0 0.75em !important;
+        box-sizing: border-box !important;
         font-size: 0.85em !important;
-        border-radius: 0.3em !important;
+        border-radius: 0.4em !important;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 0.35em;
         font-weight: 600;
         transition: all 0.15s ease;
@@ -3178,10 +3060,11 @@ function homepageToggleWidgetSection(checked) {
         // Deactivate all active widget fields
         $('#section-widget .homepage-field-row.homepage-field--active').each(function() {
             $(this).removeClass('homepage-field--active').addClass('homepage-field--dimmed');
-            $(this).find('.homepage-btn--remove-field, .homepage-btn--field-config, .homepage-btn--secret-toggle, .homepage-mask-toggle').hide();
+            $(this).find('.homepage-btn--remove-field, .homepage-btn--field-config, .homepage-btn--secret-toggle').hide();
             $(this).find('.homepage-dimmed-hint').show();
-            $(this).find('input, select').prop('disabled', true).val('');
-            $(this).find('select').prop('selectedIndex', 0);
+            $(this).find('input[name^="labels["]').val('');
+            $(this).find('select[name^="labels["]').prop('selectedIndex', 0);
+            $(this).find('input, select').prop('disabled', true);
         });
         homepageForceCollapseSection('widget');
     }
@@ -3203,7 +3086,12 @@ function homepageActivateField(rowElement, preventFocus) {
     }
 
     $row.removeClass('homepage-field--dimmed').addClass('homepage-field--active');
-    $row.find('.homepage-btn--remove-field, .homepage-btn--field-config, .homepage-btn--secret-toggle, .homepage-mask-toggle').show();
+    $row.find('.homepage-btn--remove-field, .homepage-btn--field-config').show();
+    if ($row.find('.cfg-attr-mask').val() === 'true' || $row.find('input.homepage-secret-input').length > 0) {
+        $row.find('.homepage-btn--secret-toggle').show();
+    } else {
+        $row.find('.homepage-btn--secret-toggle').hide();
+    }
     $row.find('.homepage-dimmed-hint').hide();
     var $inputs = $row.find('input, select').prop('disabled', false);
 
@@ -3238,14 +3126,14 @@ function homepageDeactivateField(btnElement) {
         return; // Required fields cannot be deactivated
     }
 
-    // Clear input values
-    $row.find('input[type="text"], input[type="password"], input[type="number"]').val('');
-    $row.find('select').each(function() {
+    // Clear input values (preserve Config drawer attributes such as Password Mask)
+    $row.find('input[name^="labels["]').val('');
+    $row.find('select[name^="labels["]').each(function() {
         $(this).prop('selectedIndex', 0);
     });
 
     $row.removeClass('homepage-field--active').addClass('homepage-field--dimmed');
-    $row.find('.homepage-btn--remove-field, .homepage-btn--field-config, .homepage-btn--secret-toggle, .homepage-mask-toggle').hide();
+    $row.find('.homepage-btn--remove-field, .homepage-btn--field-config, .homepage-btn--secret-toggle').hide();
     $row.find('.homepage-dimmed-hint').show();
     $row.find('input, select').prop('disabled', true);
     $row.find('.homepage-field-config-drawer').slideUp(100);
@@ -3490,53 +3378,6 @@ function homepageUpdateLivePreview() {
 
     var previewText = '';
 
-    // Synchronize Live Visual Homepage Service Card Mockup
-    $('#mockup-group-text').text(group);
-    $('#mockup-title-text').text(name);
-    if (desc && desc.trim()) {
-        $('#mockup-desc-text').text(desc).show();
-    } else {
-        $('#mockup-desc-text').hide();
-    }
-
-    if (siteMonitor || ping) {
-        $('#mockup-status-dot').show();
-    } else {
-        $('#mockup-status-dot').hide();
-    }
-
-    if (enableWidget && widgetType) {
-        $('#mockup-widget-type-text').html('<i class="fa fa-puzzle-piece"></i> ' + htmlspecialchars(widgetType));
-        $('#mockup-widget-wrap').show();
-    } else {
-        $('#mockup-widget-wrap').hide();
-    }
-
-    if (icon && icon.trim()) {
-        var resolvedIconUrl = '';
-        var cleanIcon = icon.trim();
-        if (cleanIcon.indexOf('http://') === 0 || cleanIcon.indexOf('https://') === 0 || cleanIcon.indexOf('/') === 0) {
-            resolvedIconUrl = cleanIcon;
-        } else if (cleanIcon.indexOf('si-') === 0) {
-            resolvedIconUrl = 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/' + cleanIcon.replace(/^si-/, '') + '.svg';
-        } else if (cleanIcon.indexOf('sh-') === 0) {
-            resolvedIconUrl = 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/' + cleanIcon.replace(/^sh-/, '') + '.svg';
-        } else if (cleanIcon.indexOf('mdi-') === 0) {
-            resolvedIconUrl = 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/' + cleanIcon.replace(/^mdi-/, '') + '.svg';
-        } else if (cleanIcon.indexOf('.') !== -1) {
-            var ext = cleanIcon.split('.').pop().toLowerCase();
-            var folder = (ext === 'png') ? 'png' : 'svg';
-            resolvedIconUrl = 'https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/' + folder + '/' + cleanIcon;
-        } else {
-            resolvedIconUrl = 'https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/' + cleanIcon + '.svg';
-        }
-        $('#mockup-icon-img').attr('src', resolvedIconUrl).show();
-        $('#mockup-icon-fallback').hide();
-    } else {
-        $('#mockup-icon-img').hide();
-        $('#mockup-icon-fallback').show();
-    }
-
     if (homepageCurrentPreviewTab === 'translated') {
         var yaml = '# Homepage services.yaml Translation:\n';
         yaml += '- ' + group + ':\n';
@@ -3566,7 +3407,8 @@ function homepageUpdateLivePreview() {
                     var fieldShortKey = targetKey.replace(/^homepage\.widget\./, '');
                     var fieldVal = $(this).find('input, select').val();
                     if (fieldVal) {
-                        var isMasked = $(this).find('input[type="checkbox"][name^="masks"]').is(':checked');
+                        var $maskSel = $(this).find('.cfg-attr-mask');
+                        var isMasked = $maskSel.length ? ($maskSel.val() === 'true') : $(this).find('input[type="checkbox"][name^="masks"]').is(':checked');
                         yaml += '          ' + fieldShortKey + ': ' + (isMasked ? '••••••••' : fieldVal) + '\n';
                     }
                 }
@@ -3633,15 +3475,13 @@ function homepageUpdateLivePreview() {
                 var val = $(this).val();
                 var $row = $(this).closest('.homepage-field-row');
                 var humanName = $row.find('.homepage-field-label-col label').clone().children().remove().end().text().trim() || target;
-                var isMasked = $row.find('input[type="checkbox"][name^="masks"]').is(':checked') ? 'true' : 'false';
-
                 var $drawer = $row.find('.homepage-field-config-drawer');
                 var cfgName = ($drawer.find('.cfg-attr-name').val() || '').trim() || humanName;
                 var cfgDefault = $drawer.find('.cfg-attr-default').val() || '';
                 var cfgDesc = ($drawer.find('.cfg-attr-description').val() || '').trim() || 'Homepage Discovery Label';
                 var cfgDisplay = $drawer.find('.cfg-attr-display').val() || 'always';
                 var cfgRequired = $drawer.find('.cfg-attr-required').val() || 'false';
-                var cfgMask = $drawer.find('.cfg-attr-mask').length ? $drawer.find('.cfg-attr-mask').val() : isMasked;
+                var cfgMask = $drawer.find('.cfg-attr-mask').length ? ($drawer.find('.cfg-attr-mask').val() || 'false') : ($row.find('input[type="checkbox"][name^="masks"]').is(':checked') ? 'true' : 'false');
 
                 xmlConfigs.push({
                     target: target,
@@ -3659,7 +3499,6 @@ function homepageUpdateLivePreview() {
         $('.homepage-custom-row').each(function() {
             var cKey = $(this).find('.custom-key').val();
             var cVal = $(this).find('.custom-val').val();
-            var isMasked = $(this).find('.custom-mask').is(':checked') ? 'true' : 'false';
             if (cKey && cVal) {
                 var humanName = cKey.replace(/^homepage\./, '').replace(/\./g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); });
                 var $cDrawer = $(this).find('.homepage-custom-config-drawer');
@@ -3668,7 +3507,7 @@ function homepageUpdateLivePreview() {
                 var cfgDesc = ($cDrawer.find('.custom-cfg-desc').val() || '').trim() || 'Homepage Discovery Label';
                 var cfgDisplay = $cDrawer.find('.custom-cfg-display').val() || 'always';
                 var cfgRequired = $cDrawer.find('.custom-cfg-required').val() || 'false';
-                var cfgMask = $cDrawer.find('.custom-cfg-mask').length ? $cDrawer.find('.custom-cfg-mask').val() : isMasked;
+                var cfgMask = $cDrawer.find('.custom-cfg-mask').length ? ($cDrawer.find('.custom-cfg-mask').val() || 'false') : ($(this).find('.custom-mask').is(':checked') ? 'true' : 'false');
 
                 xmlConfigs.push({
                     target: cKey,
@@ -3856,13 +3695,13 @@ function homepageSaveLabels(recreate) {
     $('.homepage-custom-row').each(function() {
         var key = $(this).find('.custom-key').val();
         var val = $(this).find('.custom-val').val();
-        var masked = $(this).find('.custom-mask').is(':checked');
+        var $cDrawer = $(this).find('.homepage-custom-config-drawer');
+        var masked = $cDrawer.find('.custom-cfg-mask').length ? ($cDrawer.find('.custom-cfg-mask').val() === 'true') : $(this).find('.custom-mask').is(':checked');
         if (key && key.indexOf('homepage.') === 0 && val) {
             data += '&labels[' + encodeURIComponent(key) + ']=' + encodeURIComponent(val);
             if (masked) {
                 data += '&masks[' + encodeURIComponent(key) + ']=true';
             }
-            var $cDrawer = $(this).find('.homepage-custom-config-drawer');
             if ($cDrawer.length) {
                 var cName = $cDrawer.find('.custom-cfg-name').val();
                 var cDef = $cDrawer.find('.custom-cfg-default').val();
@@ -4004,8 +3843,8 @@ function homepageCollectActiveLabelsMap() {
         var val = ($input.val() || '').toString().trim();
         if (!val) return;
 
-        var isMasked = $row.find('input[type="checkbox"][name^="masks["]').is(':checked');
         var $drawer = $row.find('.homepage-field-config-drawer');
+        var isMasked = $drawer.find('.cfg-attr-mask').length ? ($drawer.find('.cfg-attr-mask').val() === 'true') : $row.find('input[type="checkbox"][name^="masks["]').is(':checked');
         result[target] = {
             value: val,
             mask: isMasked ? 'true' : 'false',
@@ -4019,9 +3858,9 @@ function homepageCollectActiveLabelsMap() {
     $('.homepage-custom-row').each(function() {
         var key = ($(this).find('.custom-key').val() || '').trim();
         var val = ($(this).find('.custom-val').val() || '').trim();
-        var masked = $(this).find('.custom-mask').is(':checked');
+        var $cDrawer = $(this).find('.homepage-custom-config-drawer');
+        var masked = $cDrawer.find('.custom-cfg-mask').length ? ($cDrawer.find('.custom-cfg-mask').val() === 'true') : $(this).find('.custom-mask').is(':checked');
         if (key && key.indexOf('homepage.') === 0 && val) {
-            var $cDrawer = $(this).find('.homepage-custom-config-drawer');
             result[key] = {
                 value: val,
                 mask: masked ? 'true' : 'false',
@@ -4053,13 +3892,13 @@ function homepageExecuteSaveLabels(recreate) {
     $('.homepage-custom-row').each(function() {
         var key = $(this).find('.custom-key').val();
         var val = $(this).find('.custom-val').val();
-        var masked = $(this).find('.custom-mask').is(':checked');
+        var $cDrawer = $(this).find('.homepage-custom-config-drawer');
+        var masked = $cDrawer.find('.custom-cfg-mask').length ? ($cDrawer.find('.custom-cfg-mask').val() === 'true') : $(this).find('.custom-mask').is(':checked');
         if (key && key.indexOf('homepage.') === 0 && val) {
             data += '&labels[' + encodeURIComponent(key) + ']=' + encodeURIComponent(val);
             if (masked) {
                 data += '&masks[' + encodeURIComponent(key) + ']=true';
             }
-            var $cDrawer = $(this).find('.homepage-custom-config-drawer');
             if ($cDrawer.length) {
                 var cName = $cDrawer.find('.custom-cfg-name').val();
                 var cDef = $cDrawer.find('.custom-cfg-default').val();
@@ -4296,14 +4135,18 @@ function homepageApplySelectedDefault() {
                     var $row = $('#row-' + inputId);
 
                     if ($input.length) {
-                        $input.val(fieldData.value || '').prop('disabled', false);
-                        $row.removeClass('homepage-field--dimmed').addClass('homepage-field--active');
+                        $input.val(fieldData.value || '');
                         if (target === 'homepage.icon') {
                             homepageUpdateIconPreview(fieldData.value || '');
                         }
                     }
 
                     if ($row.length) {
+                        $row.removeClass('homepage-field--dimmed').addClass('homepage-field--active');
+                        $row.find('.homepage-btn--remove-field, .homepage-btn--field-config').show();
+                        $row.find('.homepage-dimmed-hint').hide();
+                        $row.find('input, select').prop('disabled', false);
+
                         var $drawer = $row.find('.homepage-field-config-drawer');
                         if ($drawer.length) {
                             if (fieldData.name) $drawer.find('.cfg-attr-name').val(fieldData.name);
@@ -4313,7 +4156,10 @@ function homepageApplySelectedDefault() {
                             if (fieldData.required) $drawer.find('.cfg-attr-required').val(fieldData.required);
                             if (fieldData.mask) {
                                 $drawer.find('.cfg-attr-mask').val(fieldData.mask);
-                                $row.find('input[type="checkbox"][name^="masks"]').prop('checked', fieldData.mask === 'true');
+                            }
+                            var $maskSel = $drawer.find('.cfg-attr-mask');
+                            if ($maskSel.length) {
+                                homepageSyncDrawerMask($maskSel[0]);
                             }
                         }
                     }
@@ -4397,14 +4243,18 @@ function homepageApplySelectedCustom() {
                     var $row = $('#row-' + inputId);
 
                     if ($input.length) {
-                        $input.val(fieldData.value || '').prop('disabled', false);
-                        $row.removeClass('homepage-field--dimmed').addClass('homepage-field--active');
+                        $input.val(fieldData.value || '');
                         if (target === 'homepage.icon') {
                             homepageUpdateIconPreview(fieldData.value || '');
                         }
                     }
 
                     if ($row.length) {
+                        $row.removeClass('homepage-field--dimmed').addClass('homepage-field--active');
+                        $row.find('.homepage-btn--remove-field, .homepage-btn--field-config').show();
+                        $row.find('.homepage-dimmed-hint').hide();
+                        $row.find('input, select').prop('disabled', false);
+
                         var $drawer = $row.find('.homepage-field-config-drawer');
                         if ($drawer.length) {
                             if (fieldData.name) $drawer.find('.cfg-attr-name').val(fieldData.name);
@@ -4414,7 +4264,10 @@ function homepageApplySelectedCustom() {
                             if (fieldData.required) $drawer.find('.cfg-attr-required').val(fieldData.required);
                             if (fieldData.mask) {
                                 $drawer.find('.cfg-attr-mask').val(fieldData.mask);
-                                $row.find('input[type="checkbox"][name^="masks"]').prop('checked', fieldData.mask === 'true');
+                            }
+                            var $maskSel = $drawer.find('.cfg-attr-mask');
+                            if ($maskSel.length) {
+                                homepageSyncDrawerMask($maskSel[0]);
                             }
                         }
                     }
@@ -4451,7 +4304,8 @@ function homepageSaveCurrentAsTemplate() {
         if (match && $(this).val()) {
             var targetKey = match[1];
             var $row = $(this).closest('.homepage-field-row');
-            var isMasked = $row.find('input[type="checkbox"][name^="masks"]').is(':checked') ? 'true' : 'false';
+            var $maskSel = $row.find('.cfg-attr-mask');
+            var isMasked = ($maskSel.length ? ($maskSel.val() === 'true') : $row.find('input[type="checkbox"][name^="masks"]').is(':checked')) ? 'true' : 'false';
             var fieldEntry = {
                 value: $(this).val(),
                 mask: isMasked,
@@ -4883,73 +4737,58 @@ function homepageToggleSecretVisibility(btn) {
 }
 
 /**
- * Synchronize inline mask checkbox with drawer select for standard fields.
- */
-function homepageSyncMask(cb) {
-    var $cb = $(cb);
-    var isChecked = $cb.is(':checked');
-    var $row = $cb.closest('.homepage-field-row');
-    $row.find('.cfg-attr-mask').val(isChecked ? 'true' : 'false');
-    var $input = $row.find('input[name^="labels["]');
-    if (isChecked) {
-        if ($input.attr('type') !== 'password' && !$input.hasClass('homepage-secret-revealed')) {
-            $input.attr('type', 'password');
-        }
-    }
-    homepageOnFieldChange();
-}
-
-/**
- * Synchronize drawer select with inline mask checkbox for standard fields.
+ * Synchronize drawer Password Mask select with field input type and secret reveal button.
  */
 function homepageSyncDrawerMask(select) {
     var $sel = $(select);
     var isMasked = ($sel.val() === 'true');
     var $row = $sel.closest('.homepage-field-row');
-    $row.find('input[type="checkbox"][name^="masks"]').prop('checked', isMasked);
     var $input = $row.find('input[name^="labels["]');
+    var $secretBtn = $row.find('.homepage-btn--secret-toggle');
     if (isMasked) {
+        $input.addClass('homepage-secret-input');
         if ($input.attr('type') !== 'password' && !$input.hasClass('homepage-secret-revealed')) {
             $input.attr('type', 'password');
+            $secretBtn.find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+            $secretBtn.attr('title', 'Show secret');
         }
-    }
-}
-
-/**
- * Handle custom row mask checkbox toggle.
- */
-function homepageOnCustomMaskChange(cb) {
-    var $cb = $(cb);
-    var isChecked = $cb.is(':checked');
-    var $row = $cb.closest('.homepage-custom-row');
-    var $valInput = $row.find('.custom-val');
-    var $secretBtn = $row.find('.custom-secret-toggle');
-    $row.find('.custom-cfg-mask').val(isChecked ? 'true' : 'false');
-    if (isChecked) {
-        $valInput.attr('type', 'password');
-        $secretBtn.show().find('i').removeClass('fa-eye-slash').addClass('fa-eye');
-        $secretBtn.attr('title', 'Show secret');
+        if ($row.hasClass('homepage-field--active')) {
+            $secretBtn.show();
+        }
     } else {
-        $valInput.attr('type', 'text').removeClass('homepage-secret-revealed');
-        $secretBtn.hide();
-        $cb.data('user-untoggled', true);
+        if ($input.attr('type') === 'password' || $input.hasClass('homepage-secret-input') || $input.hasClass('homepage-secret-revealed')) {
+            $input.attr('type', 'text').removeClass('homepage-secret-input homepage-secret-revealed');
+        }
+        $secretBtn.hide().find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+        $secretBtn.attr('title', 'Show secret');
     }
-    homepageOnFieldChange();
 }
 
 /**
  * Handle custom row drawer mask select change.
  */
-function homepageOnCustomDrawerMaskChange(select) {
+function homepageOnCustomDrawerMaskChange(select, fromAutoDetect) {
     var $sel = $(select);
     var isMasked = ($sel.val() === 'true');
     var $row = $sel.closest('.homepage-custom-row');
-    var $cb = $row.find('.custom-mask');
-    $cb.prop('checked', isMasked);
-    if (!isMasked) {
-        $cb.data('user-untoggled', true);
+    var $valInput = $row.find('.custom-val');
+    var $secretBtn = $row.find('.custom-secret-toggle');
+    if (isMasked) {
+        if ($valInput.attr('type') !== 'password' && !$valInput.hasClass('homepage-secret-revealed')) {
+            $valInput.attr('type', 'password');
+            $secretBtn.find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+            $secretBtn.attr('title', 'Show secret');
+        }
+        $secretBtn.show();
+    } else {
+        $valInput.attr('type', 'text').removeClass('homepage-secret-revealed');
+        $secretBtn.hide().find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+        $secretBtn.attr('title', 'Show secret');
+        if (!fromAutoDetect) {
+            $sel.data('user-untoggled', true);
+        }
     }
-    homepageOnCustomMaskChange($cb[0]);
+    homepageOnFieldChange();
 }
 
 /**
@@ -4959,12 +4798,12 @@ function homepageOnCustomKeyInput(input) {
     var $keyInput = $(input);
     var key = ($keyInput.val() || '').toLowerCase();
     var $row = $keyInput.closest('.homepage-custom-row');
-    var $cb = $row.find('.custom-mask');
+    var $sel = $row.find('.custom-cfg-mask');
 
     var secretKeywords = /(key|token|secret|password|passwd|pass|auth|api_key|apikey)/i;
-    if (secretKeywords.test(key) && !$cb.is(':checked') && !$cb.data('user-untoggled')) {
-        $cb.prop('checked', true);
-        homepageOnCustomMaskChange($cb[0]);
+    if ($sel.length && secretKeywords.test(key) && $sel.val() !== 'true' && !$sel.data('user-untoggled')) {
+        $sel.val('true');
+        homepageOnCustomDrawerMaskChange($sel[0], true);
     }
 }
 
@@ -4978,7 +4817,6 @@ function homepageAddCustomRow() {
     html += '<input type="text" class="custom-key" id="custom-key-' + cIdx + '" name="custom_label_keys[]" placeholder="homepage.custom.key" oninput="homepageOnCustomKeyInput(this); homepageOnFieldChange();">';
     html += '<input type="text" class="custom-val" id="custom-val-' + cIdx + '" name="custom_label_vals[]" placeholder="value" oninput="homepageOnFieldChange()">';
     html += '<button type="button" class="homepage-btn homepage-btn--secret-toggle custom-secret-toggle" title="Show secret" onclick="homepageToggleSecretVisibility(this)" style="display:none;"><i class="fa fa-eye"></i></button>';
-    html += '<label class="homepage-mask-toggle" for="custom-mask-' + cIdx + '" title="Mask value in Unraid template XML"><input type="checkbox" class="custom-mask" id="custom-mask-' + cIdx + '" name="custom_label_masks[]" value="true" onchange="homepageOnCustomMaskChange(this)"> <i class="fa fa-eye-slash"></i></label>';
     html += '<button type="button" class="homepage-btn homepage-btn--field-config" title="Advanced Unraid XML &lt;Config&gt; attributes" onclick="homepageToggleCustomConfig(this)"><i class="fa fa-cog"></i> Config</button>';
     html += '<button type="button" class="homepage-btn homepage-btn--remove" onclick="$(this).closest(\'.homepage-custom-row\').remove(); homepageUpdateBadge(\'custom\'); homepageOnFieldChange();"><i class="fa fa-trash"></i></button>';
     html += '</div>'; // .homepage-custom-main-wrap

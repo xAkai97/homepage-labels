@@ -45,8 +45,12 @@ function collectFormLabels($formLabels, $formMasks, $formConfigs, $enableWidget)
         }
 
         $mask = 'false';
-        if ((isset($formMasks[$target]) && isMaskTrue($formMasks[$target])) ||
-            (isset($formConfigs[$target]['mask']) && isMaskTrue($formConfigs[$target]['mask']))) {
+        if (isset($formMasks[$target]) || isset($formConfigs[$target]['mask'])) {
+            if ((isset($formMasks[$target]) && isMaskTrue($formMasks[$target])) ||
+                (isset($formConfigs[$target]['mask']) && isMaskTrue($formConfigs[$target]['mask']))) {
+                $mask = 'true';
+            }
+        } elseif (preg_match('/(key|token|secret|password|passwd|pass|auth|apikey)/i', $target)) {
             $mask = 'true';
         }
 

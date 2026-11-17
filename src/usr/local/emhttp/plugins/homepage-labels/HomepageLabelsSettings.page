@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     require_once '/usr/local/emhttp/plugins/homepage-labels/include/xml_parser.php';
     $bundleData = [
         'generated_at'   => date('Y-m-d H:i:s'),
-        'plugin_version' => '2026.11.02',
+        'plugin_version' => '2026.11.02.1',
         'php_version'    => PHP_VERSION,
         'os'             => PHP_OS,
         'settings'       => $settings,
@@ -240,7 +240,6 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
     <dt>&nbsp;</dt>
     <dd>
         <input type="submit" name="submit_settings" value="Apply">
-        <a href="/Settings/HomepageLabels" class="button" style="display:inline-block;margin-left:8px;text-decoration:none;">Done</a>
     </dd>
 </dl>
 
@@ -258,7 +257,6 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
     <dt>&nbsp;</dt>
     <dd>
         <input type="submit" name="submit_settings" value="Apply">
-        <a href="/Settings/HomepageLabels" class="button" style="display:inline-block;margin-left:8px;text-decoration:none;">Done</a>
     </dd>
 </dl>
 
@@ -309,7 +307,6 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
     <dt>&nbsp;</dt>
     <dd>
         <input type="submit" name="submit_settings" value="Apply">
-        <a href="/Settings/HomepageLabels" class="button" style="display:inline-block;margin-left:8px;text-decoration:none;">Done</a>
     </dd>
 </dl>
 
@@ -341,7 +338,6 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
     <dt>&nbsp;</dt>
     <dd>
         <input type="submit" name="submit_settings" value="Apply">
-        <a href="/Settings/HomepageLabels" class="button" style="display:inline-block;margin-left:8px;text-decoration:none;">Done</a>
     </dd>
 </dl>
 
@@ -370,7 +366,6 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
     <dt>&nbsp;</dt>
     <dd>
         <input type="submit" name="submit_settings" value="Apply">
-        <a href="/Settings/HomepageLabels" class="button" style="display:inline-block;margin-left:8px;text-decoration:none;">Done</a>
     </dd>
 </dl>
 
@@ -402,7 +397,7 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
 <dl>
     <dt>Support &amp; Backup Bundle:</dt>
     <dd>
-        <button type="button" class="button" onclick="document.getElementById('form-support-bundle').submit()"><i class="fa fa-download"></i> Download Support &amp; Backup Bundle</button>
+        <input type="button" id="btn-download-support-bundle" value="Download Support &amp; Backup Bundle" onclick="document.getElementById('form-support-bundle').submit()">
         <span style="display:block;margin-top:4px;font-size:0.85em;opacity:0.75;">Exports an anonymized diagnostic bundle containing your plugin settings, template discovery metadata, and custom presets for troubleshooting.</span>
     </dd>
 </dl>
@@ -411,7 +406,7 @@ $fontScale = $settings['UI_FONT_SCALE'] ?? '100';
     <dt>&nbsp;</dt>
     <dd>
         <input type="submit" id="btn-submit-settings" name="submit_settings" value="Apply">
-        <a href="/Settings/HomepageLabels" id="btn-done-settings" class="button" style="display:inline-block;margin-left:8px;text-decoration:none;">Done</a>
+        <input type="button" id="btn-done-settings" value="Done" onclick="location.href='/Settings/HomepageLabels'">
     </dd>
 </dl>
 </form>
